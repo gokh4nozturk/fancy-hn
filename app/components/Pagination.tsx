@@ -18,6 +18,14 @@ export default function Pagination({ currentPage, totalPages }: Props) {
     <div className="flex items-center gap-2 text-sm">
       <button
         type="button"
+        onClick={() => handlePageChange(1)}
+        disabled={currentPage <= 1}
+        className="pagination-button"
+      >
+        İlk
+      </button>
+      <button
+        type="button"
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage <= 1}
         className="pagination-button"
@@ -34,6 +42,14 @@ export default function Pagination({ currentPage, totalPages }: Props) {
         className="pagination-button"
       >
         Sonraki
+      </button>
+      <button
+        type="button"
+        onClick={() => handlePageChange(totalPages)}
+        disabled={currentPage >= totalPages}
+        className="pagination-button"
+      >
+        Son
       </button>
     </div>
   );
