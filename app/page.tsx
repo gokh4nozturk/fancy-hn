@@ -1,4 +1,4 @@
-import { fetchTopStories, fetchItem, getStories } from './lib/api';
+import { getStories } from './lib/api';
 import StoryList from './components/StoryList';
 import { ThemeToggle } from './components/ThemeToggle'
 import Pagination from './components/Pagination'
