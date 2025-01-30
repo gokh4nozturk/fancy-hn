@@ -39,7 +39,7 @@ export default function Pagination({ currentPage, totalPages }: Props) {
         <ChevronLeft className="h-4 w-4" />
       </button>
       <span className="text-muted-foreground">
-        Sayfa {currentPage} / {totalPages}
+        Page {currentPage} / {totalPages}
       </span>
       <button
         type="button"

@@ -1,6 +1,6 @@
 const API_BASE = 'https://hacker-news.firebaseio.com/v0';
 
-export async function fetchTopStories(limit = 90): Promise<number[]> {
+export async function fetchTopStories(limit = 1000): Promise<number[]> {
   const response = await fetch(`${API_BASE}/topstories.json`);
   const ids = await response.json();
   return ids.slice(0, limit);
