@@ -4,11 +4,30 @@ import type { Story } from './types';
 import { ThemeToggle } from './components/ThemeToggle'
 import Pagination from './components/Pagination'
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: { page?: string };
+type Params = Promise<{ slug: string }>
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
+ 
+export async function generateMetadata(props: {
+  params: Params
+  searchParams: SearchParams
 }) {
+  const params = await props.params
+  const searchParams = await props.searchParams
+  const page = Number(searchParams.page) || 1;
+  const { stories, total, currentPage, totalPages } = await getStories(page);
+
+  return {
+    title: `Hacker News - Page ${page}`,
+    description: `Page ${page} of Hacker News stories`,
+  };
+}
+
+export default async function Home(props: {
+  params: Params
+  searchParams: SearchParams
+}) {
+  const params = await props.params
+  const searchParams = await props.searchParams
   const page = Number(searchParams.page) || 1;
   const { stories, total, currentPage, totalPages } = await getStories(page);
 
