@@ -1,6 +1,12 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import {
+  ChevronFirst,
+  ChevronLast,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 
 interface Props {
   currentPage: number;
@@ -22,7 +28,7 @@ export default function Pagination({ currentPage, totalPages }: Props) {
         disabled={currentPage <= 1}
         className="pagination-button"
       >
-        İlk
+        <ChevronFirst className="h-4 w-4" />
       </button>
       <button
         type="button"
@@ -30,7 +36,7 @@ export default function Pagination({ currentPage, totalPages }: Props) {
         disabled={currentPage <= 1}
         className="pagination-button"
       >
-        Önceki
+        <ChevronLeft className="h-4 w-4" />
       </button>
       <span className="text-muted-foreground">
         Sayfa {currentPage} / {totalPages}
@@ -41,7 +47,7 @@ export default function Pagination({ currentPage, totalPages }: Props) {
         disabled={currentPage >= totalPages}
         className="pagination-button"
       >
-        Sonraki
+        <ChevronRight className="h-4 w-4" />
       </button>
       <button
         type="button"
@@ -49,7 +55,7 @@ export default function Pagination({ currentPage, totalPages }: Props) {
         disabled={currentPage >= totalPages}
         className="pagination-button"
       >
-        Son
+        <ChevronLast className="h-4 w-4" />
       </button>
     </div>
   );
