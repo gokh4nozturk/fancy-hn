@@ -18,4 +18,10 @@ export interface Comment {
   kids?: number[];
   parent: number;
   type: string;
+}
+
+export interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 } 

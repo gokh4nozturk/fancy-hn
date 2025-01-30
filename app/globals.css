@@ -18,3 +18,11 @@ body {
   @apply text-gray-900 bg-gray-50;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.pagination-button {
+  @apply px-3 py-1 rounded bg-orange-500 text-white hover:bg-orange-600 transition-colors;
+}
+
+.pagination-button:disabled {
+  @apply bg-gray-300 cursor-not-allowed;
+}
