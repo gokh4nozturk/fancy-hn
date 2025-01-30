@@ -36,7 +36,7 @@ export default function StoryList({ stories }: Props) {
                   href={story.url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-lg font-medium hover:text-primary transition-colors"
+                  className="text-lg font-medium hover:text-primary transition-colors hover:underline hover:text-orange-500 max-sm:text-orange-500 max-sm:text-sm"
                 >
                   {story.title}
                 </a>

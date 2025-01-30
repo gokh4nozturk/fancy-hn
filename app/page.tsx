@@ -34,7 +34,7 @@ export default async function Home(props: {
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b sticky top-0">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-orange-500">Hacker News</h1>
+          <h1 className="sm:text-xl font-bold text-orange-500">Hacker News</h1>
           <div className="flex items-center gap-4">
             <SearchBar />
             <ThemeToggle />
@@ -43,7 +43,7 @@ export default async function Home(props: {
       </header>
       
       <main className="max-w-4xl mx-auto py-8 px-4">
-        <div className='flex justify-between items-center mb-8'>
+        <div className='flex flex-col sm:flex-row gap-2 justify-between items-center mb-8'>
           <h1 className="text-2xl font-bold">
             {searchQuery ? `Search: ${searchQuery}` : 'Hacker News'}
           </h1>
