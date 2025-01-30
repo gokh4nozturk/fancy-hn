@@ -1,45 +1,39 @@
-import React from 'react';
-import type { PaginationProps } from '../types';
+'use client';
 
-export default function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+import { useRouter } from 'next/navigation';
+
+interface Props {
+  currentPage: number;
+  totalPages: number;
+}
+
+export default function Pagination({ currentPage, totalPages }: Props) {
+  const router = useRouter();
+
+  const handlePageChange = (page: number) => {
+    router.push(`/?page=${page}`);
+  };
+
   return (
-    <div className="flex items-center justify-center gap-2 my-4">
+    <div className="flex items-center gap-2 text-sm">
       <button
         type="button"
-        onClick={() => onPageChange(1)}
+        onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage <= 1}
-        className="px-3 py-1 rounded bg-orange-500 text-white disabled:bg-gray-300"
-      >
-        İlk
-      </button>
-      <button
-        type="button"
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage <= 1}
-        className="px-3 py-1 rounded bg-orange-500 text-white disabled:bg-gray-300"
+        className="pagination-button"
       >
         Önceki
       </button>
-      
-      <span className="mx-2">
+      <span className="text-muted-foreground">
         Sayfa {currentPage} / {totalPages}
       </span>
-
       <button
         type="button"
-        onClick={() => onPageChange(currentPage + 1)}
+        onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
-        className="px-3 py-1 rounded bg-orange-500 text-white disabled:bg-gray-300"
+        className="pagination-button"
       >
         Sonraki
-      </button>
-      <button
-        type="button"
-        onClick={() => onPageChange(totalPages)}
-        disabled={currentPage >= totalPages}
-        className="px-3 py-1 rounded bg-orange-500 text-white disabled:bg-gray-300"
-      >
-        Son
       </button>
     </div>
   );

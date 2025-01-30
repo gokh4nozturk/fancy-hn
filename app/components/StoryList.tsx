@@ -20,52 +20,45 @@ export default function StoryList({ stories, currentPage, totalPages }: Props) {
   };
 
   return (
-    <div>
-      <div className="space-y-4">
-        {stories.map((story, index) => (
-          <article 
-            key={story.id} 
-            className="flex gap-4 p-3 hover:bg-gray-50 transition-colors rounded-lg"
-          >
-            <div className="flex flex-col items-center justify-center min-w-[32px]">
-              <span className="text-gray-400 text-sm">{index + 1}</span>
-              <span className="text-orange-500 font-medium">{story.score}</span>
-            </div>
+    <div className="space-y-4">
+      {stories.map((story) => (
+        <article 
+          key={story.id} 
+          className="p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+        >
+          <div className="flex items-start gap-2">
+            <span className="text-sm text-muted-foreground min-w-[2rem] text-right mt-1">
+              {story.score}
+            </span>
             
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
+            <div className="flex-1 space-y-1">
+              <h2>
                 <a 
                   href={story.url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-lg font-medium hover:text-blue-600 transition-colors"
+                  className="text-lg font-medium hover:text-primary transition-colors"
                 >
                   {story.title}
                 </a>
                 {story.url && (
-                  <span className="text-xs text-gray-400">
+                  <span className="ml-2 text-sm text-muted-foreground">
                     ({new URL(story.url).hostname})
                   </span>
                 )}
-              </div>
+              </h2>
               
-              <div className="flex gap-3 text-sm text-gray-500">
+              <div className="text-sm text-muted-foreground">
                 <span>{story.by}</span>
-                <span>•</span>
+                <span className="mx-1">•</span>
                 <span>{formatDistanceToNow(story.time * 1000, { locale: tr })} önce</span>
-                <span>•</span>
+                <span className="mx-1">•</span>
                 <span>{story.descendants} yorum</span>
               </div>
             </div>
-          </article>
-        ))}
-      </div>
-      
-      <Pagination 
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+          </div>
+        </article>
+      ))}
     </div>
   );
 } 
