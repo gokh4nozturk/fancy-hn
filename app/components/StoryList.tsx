@@ -11,7 +11,7 @@ interface Props {
   totalPages: number;
 }
 
-export default function StoryList({ stories, currentPage, totalPages }: Props) {
+export default function StoryList({ stories }: Props) {
   const router = useRouter();
 
   const handlePageChange = (page: number) => {

@@ -41,8 +41,10 @@ export async function getStories(page = 1, perPage = 10, searchQuery?: string) {
     paginatedStoryIds.map(id => fetchItem(id))
   );
 
+  const validStories = paginatedStories.filter(story => story?.url);
+
   return {
-    stories: paginatedStories,
+    stories: validStories,
     total: filteredStories.length,
     currentPage: page,
     totalPages: Math.ceil(filteredStories.length / perPage)

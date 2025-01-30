@@ -1,6 +1,5 @@
 import { fetchTopStories, fetchItem, getStories } from './lib/api';
 import StoryList from './components/StoryList';
-import type { Story } from './types';
 import { ThemeToggle } from './components/ThemeToggle'
 import Pagination from './components/Pagination'
 import { SearchBar } from './components/SearchBar'
@@ -12,10 +11,8 @@ export async function generateMetadata(props: {
   params: Params
   searchParams: SearchParams
 }) {
-  const params = await props.params
   const searchParams = await props.searchParams
   const page = Number(searchParams.page) || 1;
-  const { stories, total, currentPage, totalPages } = await getStories(page);
 
   return {
     title: `Hacker News - Page ${page}`,
