@@ -12,9 +12,9 @@ export default async function Home({
   const { stories, total, currentPage, totalPages } = await getStories(page);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b sticky top-0">
-        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center">
+    <div className="min-h-screen bg-background">
+      <header className="bg-card border-b sticky top-0">
+        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
           <h1 className="text-xl font-bold text-orange-500">Hacker News</h1>
           <ThemeToggle />
         </div>
