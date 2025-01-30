@@ -34,7 +34,10 @@ export default async function Home(props: {
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b sticky top-0">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
-          <h1 className="sm:text-xl font-bold text-orange-500">Hacker News</h1>
+          <div className="flex items-center gap-2">
+            <img src="/favicon.svg" alt="Hacker News" className="w-6 h-6" />
+            <h1 className="sm:text-xl font-bold text-orange-500">Hacker News</h1>
+          </div>
           <div className="flex items-center gap-4">
             <SearchBar />
             <ThemeToggle />
