@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fancy-hn.vercel.app/sitemap.xml 
