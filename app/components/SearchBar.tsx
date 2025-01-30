@@ -11,12 +11,12 @@ export function SearchBar() {
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(searchParams.get('q') || '');
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  const updateSearch = (newQuery: string) => {
+    setQuery(newQuery);
     const params = new URLSearchParams(searchParams.toString());
     
-    if (query) {
-      params.set('q', query);
+    if (newQuery) {
+      params.set('q', newQuery);
     } else {
       params.delete('q');
     }
@@ -25,13 +25,17 @@ export function SearchBar() {
     router.push(`/?${params.toString()}`);
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+  };
+
   return (
     <form onSubmit={handleSearch} className="flex gap-2">
       <Input
         type="search"
         placeholder="Search..."
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => updateSearch(e.target.value)}
         className="w-full max-w-xs"
       />
       <Button type="submit" size="icon" variant="ghost">
