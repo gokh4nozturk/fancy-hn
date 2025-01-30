@@ -2,8 +2,7 @@
 
 import type { Story } from '../types';
 import { formatDistanceToNow } from 'date-fns';
-import { tr } from 'date-fns/locale';
-import Pagination from './Pagination';
+import { enUS } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
 
 interface Props {
@@ -51,9 +50,9 @@ export default function StoryList({ stories, currentPage, totalPages }: Props) {
               <div className="text-sm text-muted-foreground">
                 <span>{story.by}</span>
                 <span className="mx-1">•</span>
-                <span>{formatDistanceToNow(story.time * 1000, { locale: tr })} önce</span>
+                <span>{formatDistanceToNow(story.time * 1000, { locale: enUS })} ago</span>
                 <span className="mx-1">•</span>
-                <span>{story.descendants} yorum</span>
+                <span>{story.descendants} comments</span>
               </div>
             </div>
           </div>
