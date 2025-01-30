@@ -16,11 +16,26 @@ export async function fetchUser(username: string) {
   return response.json();
 }
 
-export async function getStories(page = 1, perPage = 10) {
+export async function getStories(page = 1, perPage = 10, searchQuery?: string) {
   const stories = await fetchTopStories();
+  let filteredStories = stories;
+
+  if (searchQuery) {
+    const allStories = await Promise.all(stories.map(id => fetchItem(id)));
+    filteredStories = allStories
+      .filter(story => {
+        const searchLower = searchQuery.toLowerCase();
+        return (
+          story.title?.toLowerCase().includes(searchLower) ||
+          story.by?.toLowerCase().includes(searchLower)
+        );
+      })
+      .map(story => story.id);
+  }
+
   const start = (page - 1) * perPage;
   const end = start + perPage;
-  const paginatedStoryIds = stories.slice(start, end);
+  const paginatedStoryIds = filteredStories.slice(start, end);
 
   const paginatedStories = await Promise.all(
     paginatedStoryIds.map(id => fetchItem(id))
@@ -28,8 +43,8 @@ export async function getStories(page = 1, perPage = 10) {
 
   return {
     stories: paginatedStories,
-    total: stories.length,
+    total: filteredStories.length,
     currentPage: page,
-    totalPages: Math.ceil(stories.length / perPage)
+    totalPages: Math.ceil(filteredStories.length / perPage)
   };
 } 
