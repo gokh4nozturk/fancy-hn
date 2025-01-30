@@ -3,6 +3,7 @@ import StoryList from './components/StoryList';
 import { ThemeToggle } from './components/ThemeToggle'
 import Pagination from './components/Pagination'
 import { SearchBar } from './components/SearchBar'
+import { GithubIcon } from 'lucide-react'
 
 type Params = Promise<{ slug: string }>
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
@@ -61,6 +62,19 @@ export default async function Home(props: {
           totalPages={totalPages}
         />
       </main>
+      <footer className="bg-card border-t sticky bottom-0 max-sm:pb-10">
+        <div className="max-w-4xl mx-auto px-4 h-14 flex flex-col sm:flex-row items-center justify-between text-sm gap-2">
+          <p className=" text-muted-foreground">
+            &copy; {new Date().getFullYear()} Hacker News. All rights reserved.
+          </p>
+          <p className="text-orange-500 flex items-center gap-1">
+            <GithubIcon className="w-4 h-4" /> created by {' '}
+            <a href="https://github.com/gokh4nozturk" className='hover:underline max-sm:underline' target="_blank" rel="noopener noreferrer">
+              gokh4nozturk
+            </a>
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
