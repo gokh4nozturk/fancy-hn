@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getApiUrl } from "../lib/config";
 
 interface SummaryState {
 	summary: string;
@@ -25,7 +26,7 @@ export function useStorySummaries() {
 		}));
 
 		try {
-			const response = await fetch("/api/summarize", {
+			const response = await fetch(`${getApiUrl()}/api/summarize`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
