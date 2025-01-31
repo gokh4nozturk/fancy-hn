@@ -49,4 +49,25 @@ export async function getStories(page = 1, perPage = 10, searchQuery?: string) {
     currentPage: page,
     totalPages: Math.ceil(filteredStories.length / perPage)
   };
+}
+
+export async function summarizeStory(url: string, apiKey: string) {
+  try {
+    const response = await fetch('/api/summarize', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url, apiKey }),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to summarize story');
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error('Error summarizing story:', error);
+    return { summary: 'Failed to generate summary.' };
+  }
 } 
