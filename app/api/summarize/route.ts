@@ -1,75 +1,86 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
+
+const HF_API_URL = 'https://api-inference.huggingface.co/models/facebook/bart-large-cnn';
+
+if (!process.env.HUGGING_FACE_API_KEY) {
+  throw new Error('HUGGING_FACE_API_KEY env değişkeni tanımlanmamış!');
+}
 
 export async function POST(request: Request) {
   try {
-    const { url, apiKey } = await request.json();
+    const { url } = await request.json();
 
     if (!url) {
       return NextResponse.json(
-        { error: 'URL is required' },
+        { error: 'URL gereklidir' },
         { status: 400 }
       );
     }
 
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'OpenAI API key is required' },
-        { status: 400 }
-      );
-    }
-
-    const openai = new OpenAI({
-      apiKey: apiKey,
+    console.log('Fetching URL:', url);
+    // Fetch the content from the URL with timeout
+    const response = await fetch(url, { 
+      signal: AbortSignal.timeout(5000) // 5 saniye timeout
     });
-
-    // Fetch the content from the URL
-    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error('URL içeriği alınamadı');
+    }
+    
     const html = await response.text();
 
     // Extract text content from HTML (basic implementation)
     const textContent = html.replace(/<[^>]*>/g, ' ')
                            .replace(/\s+/g, ' ')
                            .trim()
-                           .slice(0, 1500); // Limit content length
-
-    const completion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: "You are a helpful assistant that summarizes articles. Provide a concise 2-3 sentence summary."
-        },
-        {
-          role: "user",
-          content: `Please summarize this article: ${textContent}`
+                           .slice(0, 1000); // Limit content length for free API
+    // Call Hugging Face API
+    const hfResponse = await fetch(HF_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.HUGGING_FACE_API_KEY}`
+      },
+      body: JSON.stringify({
+        inputs: textContent,
+        parameters: {
+          max_length: 130,
+          min_length: 30,
+          do_sample: false
         }
-      ],
-      model: "gpt-3.5-turbo",
+      }),
     });
 
-    const summary = completion.choices[0]?.message?.content || 'Failed to generate summary.';
-
-    return NextResponse.json({ summary });
-  } catch (error: any) {
-    console.error('Error in summarize route:', error);
+    console.log('HF Response status:', hfResponse.status);
     
-    // OpenAI API'den gelen özel hataları kontrol et
-    if (error.status === 429) {
+    if (!hfResponse.ok) {
+      const errorData = await hfResponse.json().catch(() => ({ error: 'API yanıt hatası' }));
+      console.error('HF API Error:', errorData);
+      
+      if (errorData.error?.includes('Rate limit')) {
+        return NextResponse.json(
+          { error: 'Çok fazla istek yapıldı. Lütfen biraz bekleyin ve tekrar deneyin.' },
+          { status: 429 }
+        );
+      }
+
       return NextResponse.json(
-        { error: 'API kotanız dolmuş. Lütfen OpenAI hesabınızı kontrol edin veya farklı bir API anahtarı deneyin.' },
-        { status: 429 }
+        { error: `Özet oluşturma başarısız oldu: ${errorData.error || 'Bilinmeyen hata'}` },
+        { status: 500 }
       );
     }
 
-    if (error.status === 401) {
-      return NextResponse.json(
-        { error: 'Geçersiz API anahtarı. Lütfen doğru bir OpenAI API anahtarı girdiğinizden emin olun.' },
-        { status: 401 }
-      );
-    }
+    const result = await hfResponse.json();
+    console.log('HF API Result:', result);
 
+    // BART modeli için response formatı
+    const summary = Array.isArray(result) ? result[0].summary_text : result[0]?.summary_text || 'Özet oluşturulamadı';
+    return NextResponse.json({ summary });
+  } catch (error: unknown) {
+    console.error('Detailed error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Özet oluşturulurken bir hata oluştu';
     return NextResponse.json(
-      { error: 'Özet oluşturulurken bir hata oluştu. Lütfen daha sonra tekrar deneyin.' },
+      { error: errorMessage },
       { status: 500 }
     );
   }
