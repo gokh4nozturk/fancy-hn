@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { ExternalLink, FileText, MessageSquare, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useReadStories } from "../hooks/useReadStories";
+import { useStorySummaries } from "../hooks/useStorySummaries";
 import type { Story } from "../types";
 import StoryDetail from "./StoryDetail";
 
@@ -37,7 +38,7 @@ interface Props {
 export default function StoryList({ stories }: Props) {
 	const [selectedStory, setSelectedStory] = useState<Story | null>(null);
 	const { isRead, markAsRead } = useReadStories();
-	const [summaries, setSummaries] = useState<Record<number, string>>({});
+	const { getSummary, storeSummary, isSummaryValid } = useStorySummaries();
 	const [loadingSummaries, setLoadingSummaries] = useState<
 		Record<number, boolean>
 	>({});
@@ -49,6 +50,14 @@ export default function StoryList({ stories }: Props) {
 
 	const handleSummarize = async (story: Story) => {
 		if (!story.url || loadingSummaries[story.id]) return;
+
+		// Check if we have a valid cached summary
+		if (isSummaryValid(story.id)) {
+			const existingSummary = getSummary(story.id);
+			if (existingSummary) {
+				return; // Use the cached summary
+			}
+		}
 
 		setLoadingSummaries((prev) => ({ ...prev, [story.id]: true }));
 		try {
@@ -66,13 +75,14 @@ export default function StoryList({ stories }: Props) {
 				throw new Error(data.error || "Failed to generate summary");
 			}
 
-			setSummaries((prev) => ({ ...prev, [story.id]: data.summary }));
+			// Store the summary in local storage
+			storeSummary(story.id, data.summary);
 		} catch (error) {
 			console.error("Summary error:", error);
-			setSummaries((prev) => ({
-				...prev,
-				[story.id]: "Failed to generate summary. Please try again later.",
-			}));
+			storeSummary(
+				story.id,
+				"Failed to generate summary. Please try again later.",
+			);
 		} finally {
 			setLoadingSummaries((prev) => ({ ...prev, [story.id]: false }));
 		}
@@ -135,23 +145,12 @@ export default function StoryList({ stories }: Props) {
 								{story.url && (
 									<>
 										<span className="hidden sm:inline">•</span>
-										<a
-											href={story.url}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="inline-flex items-center gap-1 hover:text-orange-500 dark:hover:text-orange-300"
-											onClick={() => handleStoryClick(story)}
-										>
-											<ExternalLink className="h-4 w-4" />
-											<span>visit</span>
-										</a>
-										<span className="hidden sm:inline">•</span>
 										<Popover.Root
 											open={openPopoverId === story.id}
 											onOpenChange={(open) => {
 												if (open) {
 													setOpenPopoverId(story.id);
-													if (!summaries[story.id]) {
+													if (!isSummaryValid(story.id)) {
 														handleSummarize(story);
 													}
 												} else {
@@ -169,7 +168,7 @@ export default function StoryList({ stories }: Props) {
 													<span>
 														{loadingSummaries[story.id]
 															? "summarizing..."
-															: summaries[story.id]
+															: getSummary(story.id)
 																? "summary"
 																: "summarize"}
 													</span>
@@ -185,7 +184,12 @@ export default function StoryList({ stories }: Props) {
 													<div className="space-y-2">
 														<h3 className="text-sm font-medium">Summary</h3>
 														<p className="text-sm text-muted-foreground">
-															{summaries[story.id] || <LoadingText />}
+															{loadingSummaries[story.id] ? (
+																<LoadingText />
+															) : (
+																getSummary(story.id)?.summary ||
+																"No summary available"
+															)}
 														</p>
 													</div>
 													<Popover.Arrow className="fill-white dark:fill-gray-800" />

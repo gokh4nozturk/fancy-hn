@@ -12,7 +12,8 @@ import {
 	User as UserIcon,
 	X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useStorySummaries } from "../hooks/useStorySummaries";
 import { fetchItem, fetchUser } from "../lib/api";
 import type { Comment, Story, User as UserType } from "../types";
 
@@ -42,36 +43,42 @@ function SanitizedHtml({
 	);
 }
 
+const LoadingText = () => {
+	const [text, setText] = useState("Generating summary");
+
+	useEffect(() => {
+		const dots = [".", "..", "..."];
+		let i = 0;
+
+		const interval = setInterval(() => {
+			setText(`Generating summary${dots[i]}`);
+			i = (i + 1) % dots.length;
+		}, 500);
+
+		return () => clearInterval(interval);
+	}, []);
+
+	return <span className="inline-block min-w-[180px] font-mono">{text}</span>;
+};
+
 export default function StoryDetail({ story, onClose, open }: Props) {
 	const [comments, setComments] = useState<Comment[]>([]);
 	const [author, setAuthor] = useState<UserType | null>(null);
 	const [loading, setLoading] = useState(true);
-	const [summary, setSummary] = useState<string>("");
 	const [summarizing, setSummarizing] = useState(false);
+	const [hasInitialized, setHasInitialized] = useState(false);
+	const { getSummary, storeSummary } = useStorySummaries();
 
-	useEffect(() => {
-		if (open && story.kids) {
-			setLoading(true);
-			// Fetch top-level comments
-			Promise.all(story.kids.slice(0, 10).map((id) => fetchItem(id)))
-				.then((fetchedComments) => {
-					setComments(
-						fetchedComments.filter(
-							(c): c is Comment =>
-								c?.type === "comment" && !c.deleted && !c.dead,
-						),
-					);
-				})
-				.catch(console.error)
-				.finally(() => setLoading(false));
-
-			// Fetch author details
-			fetchUser(story.by).then(setAuthor).catch(console.error);
-		}
-	}, [open, story]);
-
-	const handleSummarize = async () => {
+	const handleSummarize = useCallback(async () => {
 		if (!story.url || summarizing) return;
+
+		// Check if we have a valid cached summary
+		const existingSummary = getSummary(story.id);
+		if (existingSummary) {
+			console.log("Using cached summary");
+
+			return; // Use the cached summary without making an API call
+		}
 
 		setSummarizing(true);
 		try {
@@ -84,21 +91,73 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 			});
 
 			const data = await response.json();
-			console.log("API Response:", { status: response.status, data });
 
 			if (!response.ok) {
-				setSummary(data.error || "Failed to generate summary");
-				return;
+				throw new Error(data.error || "Failed to generate summary");
 			}
 
-			setSummary(data.summary);
+			// Store the summary in local storage
+			storeSummary(story.id, data.summary);
 		} catch (error) {
 			console.error("Summary error:", error);
-			setSummary("Failed to generate summary. Please try again later.");
+			storeSummary(
+				story.id,
+				"Failed to generate summary. Please try again later.",
+			);
 		} finally {
 			setSummarizing(false);
 		}
-	};
+	}, [story.url, story.id, summarizing, storeSummary, getSummary]);
+
+	// Initialize data when dialog opens
+	useEffect(() => {
+		if (!open || hasInitialized) return;
+
+		const initializeData = async () => {
+			setLoading(true);
+			try {
+				// Fetch comments if available
+				if (story.kids?.length) {
+					const fetchedComments = await Promise.all(
+						story.kids.slice(0, 10).map((id) => fetchItem(id)),
+					);
+					setComments(
+						fetchedComments.filter(
+							(c): c is Comment =>
+								c?.type === "comment" && !c.deleted && !c.dead,
+						),
+					);
+				}
+
+				// Fetch author details
+				if (story.by) {
+					const authorData = await fetchUser(story.by);
+					setAuthor(authorData);
+				}
+
+				// Check if we need to fetch the summary
+				const existingSummary = getSummary(story.id);
+				if (story.url && !existingSummary) {
+					await handleSummarize();
+				}
+
+				setHasInitialized(true);
+			} catch (error) {
+				console.error("Error initializing data:", error);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		initializeData();
+	}, [open, story, handleSummarize, getSummary, hasInitialized]);
+
+	// Reset initialization state when dialog closes
+	useEffect(() => {
+		if (!open) {
+			setHasInitialized(false);
+		}
+	}, [open]);
 
 	return (
 		<Dialog.Root open={open} onOpenChange={(open) => !open && onClose()}>
@@ -138,11 +197,15 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 										<button
 											type="button"
 											onClick={handleSummarize}
-											disabled={summarizing}
+											disabled={summarizing || !!getSummary(story.id)}
 											className="inline-flex items-center gap-2 px-3 py-1 text-sm bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
 										>
 											<FileText className="h-4 w-4" />
-											{summarizing ? "Summarizing..." : "Summarize"}
+											{summarizing
+												? "Summarizing..."
+												: getSummary(story.id)
+													? "Summary Ready"
+													: "Summarize"}
 										</button>
 									</div>
 								)}
@@ -172,13 +235,18 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 						<div className="flex-1 overflow-y-auto bg-background">
 							<div className="p-4 sm:p-6 space-y-6">
 								{/* Summary */}
-								{summary && (
+								{story.url && (
 									<div className="prose prose-orange dark:prose-invert max-w-none bg-orange-50 dark:bg-orange-950/20 rounded-lg p-4 break-words overflow-hidden border border-orange-200 dark:border-orange-900">
 										<h3 className="text-sm font-medium text-orange-800 dark:text-orange-200 mb-2">
 											Summary
 										</h3>
 										<p className="text-sm text-orange-700 dark:text-orange-300">
-											{summary}
+											{summarizing ? (
+												<LoadingText />
+											) : (
+												getSummary(story.id)?.summary ||
+												"Click 'Summarize' to generate a summary"
+											)}
 										</p>
 									</div>
 								)}
