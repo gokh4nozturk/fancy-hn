@@ -6,6 +6,7 @@ import { enUS } from "date-fns/locale";
 import { motion } from "framer-motion";
 import {
 	ExternalLink,
+	FileText,
 	MessageSquare,
 	ThumbsUp,
 	User as UserIcon,
@@ -45,6 +46,8 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 	const [comments, setComments] = useState<Comment[]>([]);
 	const [author, setAuthor] = useState<UserType | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [summary, setSummary] = useState<string>("");
+	const [summarizing, setSummarizing] = useState(false);
 
 	useEffect(() => {
 		if (open && story.kids) {
@@ -66,6 +69,36 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 			fetchUser(story.by).then(setAuthor).catch(console.error);
 		}
 	}, [open, story]);
+
+	const handleSummarize = async () => {
+		if (!story.url || summarizing) return;
+
+		setSummarizing(true);
+		try {
+			const response = await fetch("/api/summarize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url: story.url }),
+			});
+
+			const data = await response.json();
+			console.log("API Response:", { status: response.status, data });
+
+			if (!response.ok) {
+				setSummary(data.error || "Failed to generate summary");
+				return;
+			}
+
+			setSummary(data.summary);
+		} catch (error) {
+			console.error("Summary error:", error);
+			setSummary("Failed to generate summary. Please try again later.");
+		} finally {
+			setSummarizing(false);
+		}
+	};
 
 	return (
 		<Dialog.Root open={open} onOpenChange={(open) => !open && onClose()}>
@@ -92,15 +125,26 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 								</div>
 
 								{story.url && (
-									<a
-										href={story.url}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="inline-flex items-center gap-1 text-sm text-orange-500 hover:underline"
-									>
-										<ExternalLink className="h-4 w-4" />
-										{new URL(story.url).hostname}
-									</a>
+									<div className="flex items-center justify-between">
+										<a
+											href={story.url}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center gap-1 text-sm text-orange-500 hover:underline"
+										>
+											<ExternalLink className="h-4 w-4" />
+											{new URL(story.url).hostname}
+										</a>
+										<button
+											type="button"
+											onClick={handleSummarize}
+											disabled={summarizing}
+											className="inline-flex items-center gap-2 px-3 py-1 text-sm bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+										>
+											<FileText className="h-4 w-4" />
+											{summarizing ? "Summarizing..." : "Summarize"}
+										</button>
+									</div>
 								)}
 
 								<div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground pt-2">
@@ -127,6 +171,18 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 						{/* Scrollable Content */}
 						<div className="flex-1 overflow-y-auto bg-background">
 							<div className="p-4 sm:p-6 space-y-6">
+								{/* Summary */}
+								{summary && (
+									<div className="prose prose-orange dark:prose-invert max-w-none bg-orange-50 dark:bg-orange-950/20 rounded-lg p-4 break-words overflow-hidden border border-orange-200 dark:border-orange-900">
+										<h3 className="text-sm font-medium text-orange-800 dark:text-orange-200 mb-2">
+											Summary
+										</h3>
+										<p className="text-sm text-orange-700 dark:text-orange-300">
+											{summary}
+										</p>
+									</div>
+								)}
+
 								{/* Story Content */}
 								{story.text && (
 									<SanitizedHtml
