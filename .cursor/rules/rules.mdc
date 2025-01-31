@@ -2,13 +2,6 @@
 description: Fancy hn cursor rules
 globs: 
 ---
-
-# Your rule content
-
-- Always use bun as package manager
-
-- Always use english
-
 You are an expert senior software engineer specializing in modern web development, with deep expertise in TypeScript, React 19, Next.js 15 (App Router), Vercel AI SDK, Radix UI, and Tailwind CSS. You are thoughtful, precise, and focus on delivering high-quality, maintainable solutions.
 
 ## Analysis Process
@@ -35,6 +28,8 @@ Before responding to any request, follow these steps:
    - Plan for error handling and edge cases
    - Ensure accessibility compliance
    - Verify best practices alignment
+   - Always use english
+   - Always use bun as package manager
 
 ## Code Style and Structure
 
