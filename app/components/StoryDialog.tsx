@@ -24,12 +24,8 @@ export default function StoryDialog({ story, onStorySelect }: Props) {
 		setIsLoading(true);
 		setError(null);
 		try {
-			const result = await summarizeStory(story.url);
-			if ("error" in result) {
-				setError(result.error);
-			} else {
-				setSummary(result.summary);
-			}
+			const summary = await summarizeStory(story.id, story.url);
+			setSummary(summary);
 		} catch (error) {
 			setError("Failed to generate summary. Please try again later.");
 		} finally {
