@@ -15,6 +15,15 @@ interface Props {
 	storyType: StoryType;
 }
 
+const storyTypeLabels: Record<StoryType, string> = {
+	top: "Top",
+	best: "Best",
+	new: "New",
+	ask: "Ask HN",
+	show: "Show HN",
+	job: "Jobs",
+};
+
 export function MainContent({
 	stories,
 	currentPage,
@@ -39,27 +48,20 @@ export function MainContent({
 					<h1 className="text-2xl font-bold">
 						{searchQuery ? `Search: ${searchQuery}` : "Hacker News"}
 					</h1>
-					<div className="flex items-center gap-2 text-sm">
-						<Link
-							href={{ query: { type: "top", page: 1 } }}
-							className={`px-3 py-1 rounded-full transition-colors ${
-								storyType === "top"
-									? "bg-orange-500 text-white"
-									: "hover:bg-orange-100"
-							}`}
-						>
-							Top
-						</Link>
-						<Link
-							href={{ query: { type: "best", page: 1 } }}
-							className={`px-3 py-1 rounded-full transition-colors ${
-								storyType === "best"
-									? "bg-orange-500 text-white"
-									: "hover:bg-orange-100"
-							}`}
-						>
-							Best
-						</Link>
+					<div className="flex flex-wrap items-center gap-2 text-sm">
+						{(Object.keys(storyTypeLabels) as StoryType[]).map((type) => (
+							<Link
+								key={type}
+								href={{ query: { type, page: 1 } }}
+								className={`px-3 py-1 rounded-full transition-colors ${
+									storyType === type
+										? "bg-orange-500 text-white"
+										: "hover:bg-orange-100"
+								}`}
+							>
+								{storyTypeLabels[type]}
+							</Link>
+						))}
 					</div>
 				</div>
 				<Pagination currentPage={currentPage} totalPages={totalPages} />
