@@ -1,31 +1,21 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+#!/bin/sh
 
-# Find all .ts, .tsx, and .js files in the app directory
-files=$(find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \))
-changed=false
+# Clean console logs from staged files
+clean_logs() {
+  for file in $(git diff --name-only --cached | grep '\.tsx\?$\|\.js$'); do
+    if [ -f "$file" ] && grep -l "console\.\(log\|info\|debug\)" "$file" > /dev/null; then
+      sed -i '' '/console\.\(log\|info\|debug\)/d' "$file"
+      sed -i '' '/^$/N;/^\n$/D' "$file"
+      echo "Cleaned logs from $file"
+      git add "$file"
+      return 0
+    fi
+  done
+  return 1
+}
 
-for file in $files; do
-  # Check if file contains console.log, console.info, or console.debug
-  if grep -l "console\.\(log\|info\|debug\)" "$file" > /dev/null; then
-    # Remove console.log, console.info, and console.debug lines, preserving console.error and console.warn
-    sed -i '' '/console\.\(log\|info\|debug\)/d' "$file"
-    
-    # Clean up empty lines (reduce multiple empty lines to one)
-    sed -i '' '/^$/N;/^\n$/D' "$file"
-    
-    echo "Cleaned logs from $file"
-    changed=true
-    
-    # Stage the changes
-    git add "$file"
-  fi
-done
-
-# If any files were changed, create a commit
-if [ "$changed" = true ]; then
+# Run the clean logs function
+if clean_logs; then
   git commit -m "chore: clean console logs"
   echo "Created commit for log cleanup"
-fi
-
-exit 0 
+fi 
