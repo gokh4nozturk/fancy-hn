@@ -1,8 +1,14 @@
 export function getApiUrl() {
 	if (typeof window === "undefined") {
-		return process.env.NEXT_PUBLIC_API_URL;
+		// Server-side
+		if (process.env.VERCEL_ENV === "preview") {
+			// For preview deployments
+			return `https://${process.env.VERCEL_URL}`;
+		}
+		// For production and development
+		return process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 	}
 
-	// In the browser, use the current origin
+	// Client-side: Always use the current origin
 	return window.location.origin;
 }
