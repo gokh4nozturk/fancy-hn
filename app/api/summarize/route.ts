@@ -83,7 +83,7 @@ async function fetchWithFallback(url: string, retries = 3): Promise<string> {
 				errors.push(error as Error);
 
 				if (attemptsLeft === 0) break;
-				await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second before retry
+				await new Promise((resolve) => setTimeout(resolve, 1000));
 			}
 		}
 	}
@@ -107,7 +107,6 @@ export async function POST(request: Request) {
 			);
 		}
 
-		// First check if we already have a summary
 		const existingSummary = await getSummaryFromBlob(storyId);
 
 		if (existingSummary?.summary) {
@@ -150,20 +149,20 @@ export async function POST(request: Request) {
 			);
 		}
 
-		// Extract text content from HTML (improved implementation)
 		const textContent = html
-			.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "") // Remove scripts
-			.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "") // Remove styles
-			.replace(/<nav\b[^>]*>.*?<\/nav>/gi, "") // Remove navigation
-			.replace(/<header\b[^>]*>.*?<\/header>/gi, "") // Remove header
-			.replace(/<footer\b[^>]*>.*?<\/footer>/gi, "") // Remove footer
-			.replace(/<[^>]*>/g, " ") // Remove remaining HTML tags
-			.replace(/\s+/g, " ") // Normalize whitespace
-			.replace(/&[a-z]+;/gi, " ") // Remove HTML entities
+			.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+			.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
+			.replace(/<nav\b[^>]*>.*?<\/nav>/gi, "")
+			.replace(/<header\b[^>]*>.*?<\/header>/gi, "")
+			.replace(/<footer\b[^>]*>.*?<\/footer>/gi, "")
+			.replace(/<[^>]*>/g, " ")
+			.replace(/\s+/g, " ")
+			.replace(/&[a-z]+;/gi, " ")
 			.trim()
-			.slice(0, 4000); // Take more content for better context
+			.slice(0, 4000);
 
 		if (!textContent || textContent.length < 100) {
+			console.error("Not enough content extracted");
 			return NextResponse.json(
 				{
 					error: "Could not extract enough readable content from the article.",
@@ -172,7 +171,6 @@ export async function POST(request: Request) {
 			);
 		}
 
-		// Use Together AI SDK for summarization
 		const completion = await together.chat.completions.create({
 			messages: [
 				{
@@ -195,8 +193,12 @@ export async function POST(request: Request) {
 			completion.choices[0]?.message?.content?.trim() ||
 			"Failed to generate summary";
 
-		// Save the summary to Blob storage
-		await saveSummaryToBlob(storyId, summary);
+		try {
+			await saveSummaryToBlob(storyId, summary);
+		} catch (error) {
+			console.error("Failed to save summary to blob storage:", error);
+			// Continue even if saving to blob storage fails
+		}
 
 		return NextResponse.json({ summary });
 	} catch (error: unknown) {
