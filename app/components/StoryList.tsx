@@ -5,10 +5,28 @@ import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { ExternalLink, FileText, MessageSquare, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useReadStories } from "../hooks/useReadStories";
 import type { Story } from "../types";
 import StoryDetail from "./StoryDetail";
+
+const LoadingText = () => {
+	const [text, setText] = useState("Generating summary");
+
+	useEffect(() => {
+		const dots = [".", "..", "..."];
+		let i = 0;
+
+		const interval = setInterval(() => {
+			setText(`Generating summary${dots[i]}`);
+			i = (i + 1) % dots.length;
+		}, 500);
+
+		return () => clearInterval(interval);
+	}, []);
+
+	return <span className="inline-block min-w-[180px] font-mono">{text}</span>;
+};
 
 interface Props {
 	stories: Story[];
@@ -167,7 +185,7 @@ export default function StoryList({ stories }: Props) {
 													<div className="space-y-2">
 														<h3 className="text-sm font-medium">Summary</h3>
 														<p className="text-sm text-muted-foreground">
-															{summaries[story.id] || "Loading summary..."}
+															{summaries[story.id] || <LoadingText />}
 														</p>
 													</div>
 													<Popover.Arrow className="fill-white dark:fill-gray-800" />
