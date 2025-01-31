@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# Find all staged .ts, .tsx, and .js files
-files=$(git diff --cached --name-only --diff-filter=ACMR | grep "\.tsx\?$\|\.js$" || true)
-if [ -z "$files" ]; then
-    exit 0
-fi
+# First, add all files to staging
+git add -A
+
+# Find all .ts, .tsx, and .js files in the app directory
+files=$(find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \))
 
 # Check these files for console.log
 for file in $files; do
@@ -13,7 +13,7 @@ for file in $files; do
         # Create a temporary file
         temp_file=$(mktemp)
         # Remove console.log lines and clean up empty lines
-        sed '/console\.\(log\|info\|debug\)/d' "$file" | sed '/^$/N;/^\n$/D' > "$temp_file"
+        sed -E '/console\.(log|info|debug)\(.*\);?/d' "$file" | sed '/^$/N;/^\n$/D' > "$temp_file"
         # Copy the temp file back to the original
         cp "$temp_file" "$file"
         rm "$temp_file"
