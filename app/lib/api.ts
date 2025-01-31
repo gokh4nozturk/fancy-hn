@@ -51,14 +51,14 @@ export async function getStories(page = 1, perPage = 10, searchQuery?: string) {
   };
 }
 
-export async function summarizeStory(url: string, apiKey: string) {
+export async function summarizeStory(url: string) {
   try {
     const response = await fetch('/api/summarize', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ url, apiKey }),
+      body: JSON.stringify({ url }),
     });
     
     if (!response.ok) {
@@ -68,6 +68,6 @@ export async function summarizeStory(url: string, apiKey: string) {
     return response.json();
   } catch (error) {
     console.error('Error summarizing story:', error);
-    return { summary: 'Failed to generate summary.' };
+    return { error: 'Özet oluşturulurken bir hata oluştu. Lütfen daha sonra tekrar deneyin.' };
   }
 } 
