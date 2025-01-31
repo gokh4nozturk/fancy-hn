@@ -1,11 +1,13 @@
 import type { StorySummary } from "./types";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
 export async function saveSummaryToBlob(
 	storyId: number,
 	summary: string,
 ): Promise<StorySummary> {
 	try {
-		const response = await fetch("/api/blob", {
+		const response = await fetch(`${API_BASE_URL}/api/blob`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -29,12 +31,15 @@ export async function getSummaryFromBlob(
 	storyId: number,
 ): Promise<StorySummary | null> {
 	try {
-		const response = await fetch(`/api/blob?storyId=${storyId}`, {
-			method: "GET",
-			headers: {
-				Accept: "application/json",
+		const response = await fetch(
+			`${API_BASE_URL}/api/blob?storyId=${storyId}`,
+			{
+				method: "GET",
+				headers: {
+					Accept: "application/json",
+				},
 			},
-		});
+		);
 
 		if (response.status === 404) {
 			return null;
@@ -54,9 +59,12 @@ export async function getSummaryFromBlob(
 
 export async function deleteSummaryFromBlob(storyId: number): Promise<void> {
 	try {
-		const response = await fetch(`/api/blob?storyId=${storyId}`, {
-			method: "DELETE",
-		});
+		const response = await fetch(
+			`${API_BASE_URL}/api/blob?storyId=${storyId}`,
+			{
+				method: "DELETE",
+			},
+		);
 
 		if (!response.ok) {
 			throw new Error("Failed to delete summary");
@@ -69,7 +77,7 @@ export async function deleteSummaryFromBlob(storyId: number): Promise<void> {
 
 export async function listAllSummaries(): Promise<StorySummary[]> {
 	try {
-		const response = await fetch("/api/blob", {
+		const response = await fetch(`${API_BASE_URL}/api/blob`, {
 			method: "GET",
 			headers: {
 				Accept: "application/json",
