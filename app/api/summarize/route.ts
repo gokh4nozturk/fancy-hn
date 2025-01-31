@@ -22,6 +22,7 @@ class FetchError extends Error {
 }
 
 async function fetchWithFallback(url: string, retries = 3): Promise<string> {
+
 	const userAgents = [
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 		"Mozilla/5.0 (compatible; FancyHN/1.0; +http://localhost:3000)",
@@ -35,6 +36,7 @@ async function fetchWithFallback(url: string, retries = 3): Promise<string> {
 
 		while (attemptsLeft > 0) {
 			try {
+
 				const response = await fetch(url, {
 					signal: AbortSignal.timeout(10000),
 					headers: {
@@ -54,6 +56,11 @@ async function fetchWithFallback(url: string, retries = 3): Promise<string> {
 					},
 				});
 
+				console.log(
+					"Response headers:",
+					Object.fromEntries(response.headers.entries()),
+				);
+
 				if (!response.ok) {
 					throw new FetchError(
 						`HTTP error! status: ${response.status}`,
@@ -71,14 +78,18 @@ async function fetchWithFallback(url: string, retries = 3): Promise<string> {
 					);
 				}
 
+				console.log(
+					`Successfully fetched content, length: ${text.length} characters`,
+				);
 				return text;
 			} catch (error) {
 				attemptsLeft--;
 				const errorMessage =
 					error instanceof Error ? error.message : "Unknown error";
-				console.warn(
-					`Failed to fetch with user agent ${userAgent} (${attemptsLeft} attempts left):`,
+				console.error(
+					`Failed attempt with user agent ${userAgent} (${attemptsLeft} attempts left):`,
 					errorMessage,
+					error instanceof Error ? error.stack : "",
 				);
 				errors.push(error as Error);
 
@@ -89,6 +100,7 @@ async function fetchWithFallback(url: string, retries = 3): Promise<string> {
 	}
 
 	const errorMessages = errors.map((e) => e.message).join(", ");
+	console.error("All fetch attempts failed. Complete error log:", errors);
 	throw new FetchError(
 		`All fetch attempts failed: ${errorMessages}`,
 		undefined,
