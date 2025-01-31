@@ -24,17 +24,15 @@ export default function StoryList({ stories }: Props) {
 	};
 
 	return (
-		<div className="space-y-4">
+		<div className="divide-y divide-orange-100">
 			{stories.map((story, index) => (
 				<motion.article
 					initial={{ opacity: 0, scale: 0.95 }}
 					animate={{ opacity: 1, scale: 1 }}
 					transition={{ duration: 0.3, delay: index * 0.1 }}
 					key={story.id}
-					className={`p-4 rounded-lg border transition-all ${
-						isRead(story.id)
-							? "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
-							: "bg-card hover:bg-muted/50 border-transparent"
+					className={`py-4 transition-colors ${
+						isRead(story.id) ? "bg-orange-50/50" : "hover:bg-orange-50/30"
 					}`}
 				>
 					<div className="flex items-start gap-2">
@@ -50,7 +48,7 @@ export default function StoryList({ stories }: Props) {
 									rel="noopener noreferrer"
 									className={`text-lg font-medium transition-colors hover:underline max-sm:text-sm ${
 										isRead(story.id)
-											? "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+											? "text-gray-600 hover:text-gray-800"
 											: "hover:text-orange-500 max-sm:text-orange-500"
 									}`}
 									onClick={() => handleStoryClick(story)}
@@ -65,9 +63,9 @@ export default function StoryList({ stories }: Props) {
 							</h2>
 
 							<div className="text-sm text-muted-foreground">
-								<span>{story.score}</span>
+								<span>{story.score} points</span>
 								<span className="mx-1">•</span>
-								<span>{story.by}</span>
+								<span>by {story.by}</span>
 								<span className="mx-1">•</span>
 								<span>
 									{formatDistanceToNow(story.time * 1000, { locale: enUS })} ago

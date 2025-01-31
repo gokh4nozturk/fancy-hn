@@ -36,35 +36,40 @@ export function MainContent({
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ delay: 0.3 }}
-			className="max-w-4xl mx-auto py-8 px-4"
+			className="max-w-4xl mx-auto py-4 px-4"
 		>
 			<motion.div
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				transition={{ delay: 0.4 }}
-				className="flex flex-col sm:flex-row gap-2 justify-between items-center mb-8"
+				className="mb-6"
 			>
-				<div className="flex flex-col sm:flex-row items-center gap-4">
-					<h1 className="text-2xl font-bold">
-						{searchQuery ? `Search: ${searchQuery}` : "Hacker News"}
-					</h1>
-					<div className="flex flex-wrap items-center gap-2 text-sm">
+				<div className="flex flex-col md:flex-row items-center gap-6 border-b border-orange-200 pb-2">
+					<nav className="flex items-center gap-4 text-sm">
 						{(Object.keys(storyTypeLabels) as StoryType[]).map((type) => (
 							<Link
 								key={type}
 								href={{ query: { type, page: 1 } }}
-								className={`px-3 py-1 rounded-full transition-colors ${
+								className={`transition-colors ${
 									storyType === type
-										? "bg-orange-500 text-white"
-										: "hover:bg-orange-100"
+										? "text-orange-500 font-medium"
+										: "text-gray-600 hover:text-orange-500"
 								}`}
 							>
 								{storyTypeLabels[type]}
 							</Link>
 						))}
+					</nav>
+					<div className="md:ml-auto">
+						<Pagination currentPage={currentPage} totalPages={totalPages} />
 					</div>
 				</div>
-				<Pagination currentPage={currentPage} totalPages={totalPages} />
+				{searchQuery && (
+					<div className="mt-4 text-sm text-gray-600">
+						Search results for:{" "}
+						<span className="font-medium">{searchQuery}</span>
+					</div>
+				)}
 			</motion.div>
 			<StoryList
 				stories={stories}
