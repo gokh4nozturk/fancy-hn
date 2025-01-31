@@ -53,7 +53,7 @@ export function MainContent({
 								className={`transition-colors ${
 									storyType === type
 										? "text-orange-500 font-medium"
-										: "text-gray-600 hover:text-orange-500"
+										: "text-foreground hover:text-orange-500"
 								}`}
 							>
 								{storyTypeLabels[type]}

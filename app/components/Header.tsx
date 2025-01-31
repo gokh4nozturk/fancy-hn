@@ -11,7 +11,7 @@ export function Header() {
 			initial={{ y: -100 }}
 			animate={{ y: 0 }}
 			transition={{ type: "spring", stiffness: 100 }}
-			className="bg-card border-b sticky top-0 z-10"
+			className="bg-card border-b border-border sticky top-0 z-10"
 		>
 			<div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
 				<motion.div
@@ -31,7 +31,7 @@ export function Header() {
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ delay: 0.2 }}
-						className="hidden sm:block text-xl font-bold text-orange-500"
+						className="hidden sm:block text-xl font-bold text-orange-500 dark:text-orange-400"
 					>
 						Hacker News
 					</motion.h1>
@@ -39,7 +39,7 @@ export function Header() {
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ delay: 0.2 }}
-						className="block sm:hidden text-xl font-bold text-orange-500 mr-5"
+						className="block sm:hidden text-xl font-bold text-orange-500 dark:text-orange-400 mr-5"
 					>
 						HN
 					</motion.h1>
