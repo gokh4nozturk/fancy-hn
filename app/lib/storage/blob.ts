@@ -6,7 +6,9 @@ export async function saveSummaryToBlob(
 	summary: string,
 ): Promise<StorySummary> {
 	try {
-		const response = await fetch(`${getApiUrl()}/api/blob`, {
+		const apiUrl = getApiUrl();
+
+		const response = await fetch(`${apiUrl}/api/blob`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -14,12 +16,13 @@ export async function saveSummaryToBlob(
 			body: JSON.stringify({ storyId, summary }),
 		});
 
+		const responseData = await response.json();
+
 		if (!response.ok) {
-			throw new Error("Failed to save summary");
+			throw new Error(responseData.error || "Failed to save summary");
 		}
 
-		const { data } = await response.json();
-		return data;
+		return responseData.data;
 	} catch (error) {
 		console.error("Storage error: Failed to save summary", error);
 		throw error;
@@ -30,23 +33,30 @@ export async function getSummaryFromBlob(
 	storyId: number,
 ): Promise<StorySummary | null> {
 	try {
-		const response = await fetch(`${getApiUrl()}/api/blob?storyId=${storyId}`, {
+		const apiUrl = getApiUrl();
+		console.log(
+			"Fetching summary from blob storage:",
+			`${apiUrl}/api/blob?storyId=${storyId}`,
+		);
+
+		const response = await fetch(`${apiUrl}/api/blob?storyId=${storyId}`, {
 			method: "GET",
 			headers: {
 				Accept: "application/json",
 			},
 		});
 
+		const responseData = await response.json();
+
 		if (response.status === 404) {
 			return null;
 		}
 
 		if (!response.ok) {
-			throw new Error("Failed to fetch summary");
+			throw new Error(responseData.error || "Failed to fetch summary");
 		}
 
-		const { data } = await response.json();
-		return data;
+		return responseData.data;
 	} catch (error) {
 		console.error("Storage error: Failed to fetch summary", error);
 		return null;
@@ -55,12 +65,19 @@ export async function getSummaryFromBlob(
 
 export async function deleteSummaryFromBlob(storyId: number): Promise<void> {
 	try {
-		const response = await fetch(`${getApiUrl()}/api/blob?storyId=${storyId}`, {
+		const apiUrl = getApiUrl();
+		console.log(
+			"Deleting summary from blob storage:",
+			`${apiUrl}/api/blob?storyId=${storyId}`,
+		);
+
+		const response = await fetch(`${apiUrl}/api/blob?storyId=${storyId}`, {
 			method: "DELETE",
 		});
 
 		if (!response.ok) {
-			throw new Error("Failed to delete summary");
+			const responseData = await response.json();
+			throw new Error(responseData.error || "Failed to delete summary");
 		}
 	} catch (error) {
 		console.error("Storage error: Failed to delete summary", error);
@@ -70,19 +87,26 @@ export async function deleteSummaryFromBlob(storyId: number): Promise<void> {
 
 export async function listAllSummaries(): Promise<StorySummary[]> {
 	try {
-		const response = await fetch(`${getApiUrl()}/api/blob`, {
+		const apiUrl = getApiUrl();
+		console.log(
+			"Listing all summaries from blob storage:",
+			`${apiUrl}/api/blob`,
+		);
+
+		const response = await fetch(`${apiUrl}/api/blob`, {
 			method: "GET",
 			headers: {
 				Accept: "application/json",
 			},
 		});
 
+		const responseData = await response.json();
+
 		if (!response.ok) {
-			throw new Error("Failed to list summaries");
+			throw new Error(responseData.error || "Failed to list summaries");
 		}
 
-		const { data } = await response.json();
-		return data;
+		return responseData.data || [];
 	} catch (error) {
 		console.error("Storage error: Failed to list summaries", error);
 		return [];
