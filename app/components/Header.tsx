@@ -1,9 +1,9 @@
 "use client";
 
+import { motion } from "framer-motion";
+import { RefreshButton } from "./RefreshButton";
 import { SearchBar } from "./SearchBar";
 import { ThemeToggle } from "./ThemeToggle";
-import { RefreshButton } from "./RefreshButton";
-import { motion } from "framer-motion";
 
 export function Header() {
 	return (
@@ -27,7 +27,22 @@ export function Header() {
 						alt="Hacker News"
 						className="w-6 h-6"
 					/>
-					<h1 className="sm:text-xl font-bold text-orange-500">Hacker News</h1>
+					<motion.h1
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ delay: 0.2 }}
+						className="hidden sm:block text-xl font-bold text-orange-500"
+					>
+						Hacker News
+					</motion.h1>
+					<motion.h1
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ delay: 0.2 }}
+						className="block sm:hidden text-xl font-bold text-orange-500 mr-5"
+					>
+						HN
+					</motion.h1>
 				</motion.div>
 				<motion.div
 					initial={{ opacity: 0, x: 20 }}
