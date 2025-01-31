@@ -2,6 +2,34 @@ const API_BASE = "https://hacker-news.firebaseio.com/v0";
 
 export type StoryType = "top" | "best" | "new" | "ask" | "show" | "job";
 
+// Cache for maxItem to avoid frequent API calls
+let maxItemCache: { value: number; timestamp: number } | null = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+export async function fetchMaxItem(): Promise<number> {
+	// Return cached value if it's still valid
+	if (maxItemCache && Date.now() - maxItemCache.timestamp < CACHE_DURATION) {
+		return maxItemCache.value;
+	}
+
+	try {
+		const response = await fetch(`${API_BASE}/maxitem.json`);
+		const maxItem = await response.json();
+
+		// Update cache
+		maxItemCache = {
+			value: maxItem,
+			timestamp: Date.now(),
+		};
+
+		return maxItem;
+	} catch (error) {
+		console.error("Error fetching max item:", error);
+		// Return cached value if available, even if expired
+		return maxItemCache?.value ?? 0;
+	}
+}
+
 export async function fetchTopStories(limit = 1000): Promise<number[]> {
 	const response = await fetch(`${API_BASE}/topstories.json`);
 	const ids = await response.json();
@@ -55,25 +83,28 @@ export async function getStories(
 	storyType: StoryType = "top",
 ) {
 	let stories: number[];
+	const maxItem = await fetchMaxItem();
+	const defaultLimit = Math.min(1000, Math.floor(maxItem * 0.01)); // Use 1% of total items as default limit
+	const specialLimit = Math.min(200, Math.floor(maxItem * 0.002)); // Use 0.2% for special categories
 
 	switch (storyType) {
 		case "best":
-			stories = await fetchBestStories();
+			stories = await fetchBestStories(defaultLimit);
 			break;
 		case "new":
-			stories = await fetchNewStories();
+			stories = await fetchNewStories(defaultLimit);
 			break;
 		case "ask":
-			stories = await fetchAskStories();
+			stories = await fetchAskStories(specialLimit);
 			break;
 		case "show":
-			stories = await fetchShowStories();
+			stories = await fetchShowStories(specialLimit);
 			break;
 		case "job":
-			stories = await fetchJobStories();
+			stories = await fetchJobStories(specialLimit);
 			break;
 		default:
-			stories = await fetchTopStories();
+			stories = await fetchTopStories(defaultLimit);
 	}
 
 	let filteredStories = stories;
