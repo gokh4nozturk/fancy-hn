@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "./providers/ThemeProvider";
+import * as Tooltip from "@radix-ui/react-tooltip";
 import { Analytics } from "@vercel/analytics/next";
+import { ThemeProvider } from "./providers/ThemeProvider";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -102,7 +103,7 @@ export default function RootLayout({
 					enableSystem
 					disableTransitionOnChange
 				>
-					{children}
+					<Tooltip.Provider delayDuration={100}>{children}</Tooltip.Provider>
 				</ThemeProvider>
 				<Analytics />
 			</body>

@@ -145,7 +145,14 @@ export default function StoryList({ stories }: Props) {
 														sideOffset={8}
 													>
 														<div className="space-y-2">
-															<h3 className="text-sm font-medium">Summary</h3>
+															<div className="flex items-center gap-2">
+																<h3 className="text-sm font-medium">Summary</h3>
+																{summaryState.summary && (
+																	<span className="inline-flex items-center rounded-md bg-orange-50 dark:bg-orange-500/20 px-2 py-0.5 text-xs font-medium text-orange-600 dark:text-orange-300 ring-1 ring-inset ring-orange-500/20">
+																		Ready
+																	</span>
+																)}
+															</div>
 															<p className="text-sm text-muted-foreground">
 																{summaryState.loading ? (
 																	<LoadingText />
