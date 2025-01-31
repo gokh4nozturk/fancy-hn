@@ -4,10 +4,10 @@ A beautifully designed, modern Hacker News client with a sleek UI and seamless u
 
 Features
 
-✅ Clean and elegant interface
-✅ Dark mode support
-✅ Smooth navigation & fast performance
-✅ Real-time updates
+    ✅ Clean and elegant interface
+    ✅ Dark mode support
+    ✅ Smooth navigation & fast performance
+    ✅ Real-time updates
 
 Check out the project and contribute! 🔥
 
