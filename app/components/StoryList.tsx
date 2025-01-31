@@ -30,7 +30,6 @@ export default function StoryList({ stories }: Props) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, delay: index * 0.1 }}
-          whileHover={{ scale: 1.02 }}
           key={story.id} 
           className={`p-4 rounded-lg border transition-all ${
             isRead(story.id) 
