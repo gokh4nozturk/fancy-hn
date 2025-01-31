@@ -2,6 +2,8 @@
 
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
+import { Sun, Moon } from 'lucide-react'
+import { Button } from './ui/button'
 
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false)
@@ -16,16 +18,17 @@ export function ThemeToggle() {
   }
 
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="icon"
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="rounded-lg p-2 hover:bg-muted transition-colors"
+      className="hover:text-orange-500"
     >
       {theme === 'dark' ? (
-        <span className="text-xl">🌞</span>
+        <Sun className="h-5 w-5 transition-all" />
       ) : (
-        <span className="text-xl">🌙</span>
+        <Moon className="h-5 w-5 transition-all" />
       )}
-    </button>
+    </Button>
   )
 } 
