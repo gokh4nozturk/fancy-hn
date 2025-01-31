@@ -9,6 +9,6 @@ A beautifully designed, modern Hacker News client with a sleek UI and seamless u
     ✅ Smooth navigation & fast performance
     ✅ Real-time updates
 
-## Check out the project and contribute! 🔥
+### Check out the project and contribute! 🔥
 
-## Let me know if you want any modifications!
+### Let me know if you want any modifications!
