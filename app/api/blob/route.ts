@@ -9,7 +9,7 @@ const BLOB_PREFIX = "summaries/";
 
 export async function GET(request: Request) {
 	try {
-		const url = new URL(request.url, `http://${request.headers.get("host")}`);
+		const url = new URL(request.url);
 		const storyId = url.searchParams.get("storyId");
 
 		if (!storyId) {
@@ -44,7 +44,6 @@ export async function GET(request: Request) {
 				}
 			} catch (error) {
 				// Skip invalid blobs silently
-				// biome-ignore lint/correctness/noUnnecessaryContinue: <explanation>
 				continue;
 			}
 		}
@@ -107,7 +106,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
 	try {
-		const url = new URL(request.url, `http://${request.headers.get("host")}`);
+		const url = new URL(request.url);
 		const storyId = url.searchParams.get("storyId");
 
 		if (!storyId) {

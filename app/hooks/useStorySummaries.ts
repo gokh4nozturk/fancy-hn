@@ -26,7 +26,9 @@ export function useStorySummaries() {
 		}));
 
 		try {
-			const response = await fetch(`${getApiUrl()}/api/summarize`, {
+			const apiUrl = getApiUrl();
+
+			const response = await fetch(`${apiUrl}/api/summarize`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -48,11 +50,12 @@ export function useStorySummaries() {
 
 			return data.summary;
 		} catch (error) {
+			console.error("Summary error:", error);
 			const errorMessage =
 				error instanceof Error
 					? error.message
 					: "Failed to generate summary. Please try again later.";
-			console.error("Summary error:", error);
+
 			setSummaries((prev) => ({
 				...prev,
 				[storyId]: { summary: "", loading: false, error: errorMessage },
