@@ -1,7 +1,15 @@
 const API_BASE = "https://hacker-news.firebaseio.com/v0";
 
+export type StoryType = "top" | "best";
+
 export async function fetchTopStories(limit = 1000): Promise<number[]> {
 	const response = await fetch(`${API_BASE}/topstories.json`);
+	const ids = await response.json();
+	return ids.slice(0, limit);
+}
+
+export async function fetchBestStories(limit = 1000): Promise<number[]> {
+	const response = await fetch(`${API_BASE}/beststories.json`);
 	const ids = await response.json();
 	return ids.slice(0, limit);
 }
@@ -16,8 +24,14 @@ export async function fetchUser(username: string) {
 	return response.json();
 }
 
-export async function getStories(page = 1, perPage = 10, searchQuery?: string) {
-	const stories = await fetchTopStories();
+export async function getStories(
+	page = 1,
+	perPage = 10,
+	searchQuery?: string,
+	storyType: StoryType = "top",
+) {
+	const stories =
+		storyType === "top" ? await fetchTopStories() : await fetchBestStories();
 	let filteredStories = stories;
 
 	if (searchQuery) {
@@ -48,6 +62,7 @@ export async function getStories(page = 1, perPage = 10, searchQuery?: string) {
 		total: filteredStories.length,
 		currentPage: page,
 		totalPages: Math.ceil(filteredStories.length / perPage),
+		storyType,
 	};
 }
 

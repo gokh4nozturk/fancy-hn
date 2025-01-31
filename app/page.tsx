@@ -1,7 +1,7 @@
-import { getStories } from "./lib/api";
+import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { MainContent } from "./components/MainContent";
-import { Footer } from "./components/Footer";
+import { type StoryType, getStories } from "./lib/api";
 
 type Params = Promise<{ slug: string }>;
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
@@ -12,10 +12,11 @@ export async function generateMetadata(props: {
 }) {
 	const searchParams = await props.searchParams;
 	const page = Number(searchParams.page) || 1;
+	const storyType = (searchParams.type as StoryType) || "top";
 
 	return {
-		title: `Hacker News - Page ${page}`,
-		description: `Page ${page} of Hacker News stories`,
+		title: `${storyType === "top" ? "Top" : "Best"} Stories - Page ${page}`,
+		description: `Page ${page} of ${storyType === "top" ? "top" : "best"} Hacker News stories`,
 	};
 }
 
@@ -28,10 +29,13 @@ export default async function Home(props: {
 	const page = Number(searchParams.page) || 1;
 	const searchQuery =
 		typeof searchParams.q === "string" ? searchParams.q : undefined;
+	const storyType = (searchParams.type as StoryType) || "top";
+
 	const { stories, total, currentPage, totalPages } = await getStories(
 		page,
 		10,
 		searchQuery,
+		storyType,
 	);
 
 	return (
@@ -42,6 +46,7 @@ export default async function Home(props: {
 				currentPage={currentPage}
 				totalPages={totalPages}
 				searchQuery={searchQuery}
+				storyType={storyType}
 			/>
 			<Footer />
 		</div>
