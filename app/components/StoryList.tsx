@@ -6,6 +6,8 @@ import { enUS } from 'date-fns/locale';
 import { useState } from 'react';
 import StoryDialog from './StoryDialog';
 import { motion } from 'framer-motion';
+import { useReadStories } from '../hooks/useReadStories';
+import { Check } from 'lucide-react';
 
 interface Props {
   stories: Story[];
@@ -15,6 +17,11 @@ interface Props {
 
 export default function StoryList({ stories }: Props) {
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const { isRead, markAsRead } = useReadStories();
+
+  const handleStoryClick = (story: Story) => {
+    markAsRead(story.id);
+  };
 
   return (
     <div className="space-y-4">
@@ -25,10 +32,14 @@ export default function StoryList({ stories }: Props) {
           transition={{ duration: 0.3, delay: index * 0.1 }}
           whileHover={{ scale: 1.02 }}
           key={story.id} 
-          className="p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+          className={`p-4 rounded-lg border transition-all ${
+            isRead(story.id) 
+              ? 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800' 
+              : 'bg-card hover:bg-muted/50 border-transparent'
+          }`}
         >
           <div className="flex items-start gap-2">
-            <div>
+            <div className="flex gap-2">
               <StoryDialog 
                 story={story} 
                 onStorySelect={setSelectedStory} 
@@ -41,7 +52,12 @@ export default function StoryList({ stories }: Props) {
                   href={story.url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-lg font-medium hover:text-primary transition-colors hover:underline hover:text-orange-500 max-sm:text-orange-500 max-sm:text-sm"
+                  className={`text-lg font-medium transition-colors hover:underline max-sm:text-sm ${
+                    isRead(story.id)
+                      ? 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                      : 'hover:text-orange-500 max-sm:text-orange-500'
+                  }`}
+                  onClick={() => handleStoryClick(story)}
                 >
                   {story.title}
                 </a>
