@@ -65,49 +65,13 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 	const [comments, setComments] = useState<Comment[]>([]);
 	const [author, setAuthor] = useState<UserType | null>(null);
 	const [loading, setLoading] = useState(true);
-	const [summarizing, setSummarizing] = useState(false);
 	const [hasInitialized, setHasInitialized] = useState(false);
-	const { getSummary, storeSummary } = useStorySummaries();
+	const { getSummary, getSummaryState } = useStorySummaries();
 
 	const handleSummarize = useCallback(async () => {
-		if (!story.url || summarizing) return;
-
-		// Check if we have a valid cached summary
-		const existingSummary = getSummary(story.id);
-		if (existingSummary) {
-			console.log("Using cached summary");
-
-			return; // Use the cached summary without making an API call
-		}
-
-		setSummarizing(true);
-		try {
-			const response = await fetch("/api/summarize", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ url: story.url }),
-			});
-
-			const data = await response.json();
-
-			if (!response.ok) {
-				throw new Error(data.error || "Failed to generate summary");
-			}
-
-			// Store the summary in local storage
-			storeSummary(story.id, data.summary);
-		} catch (error) {
-			console.error("Summary error:", error);
-			storeSummary(
-				story.id,
-				"Failed to generate summary. Please try again later.",
-			);
-		} finally {
-			setSummarizing(false);
-		}
-	}, [story.url, story.id, summarizing, storeSummary, getSummary]);
+		if (!story.url) return;
+		await getSummary(story.id, story.url);
+	}, [story.url, story.id, getSummary]);
 
 	// Initialize data when dialog opens
 	useEffect(() => {
@@ -135,12 +99,6 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 					setAuthor(authorData);
 				}
 
-				// Check if we need to fetch the summary
-				const existingSummary = getSummary(story.id);
-				if (story.url && !existingSummary) {
-					await handleSummarize();
-				}
-
 				setHasInitialized(true);
 			} catch (error) {
 				console.error("Error initializing data:", error);
@@ -150,7 +108,7 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 		};
 
 		initializeData();
-	}, [open, story, handleSummarize, getSummary, hasInitialized]);
+	}, [open, story, hasInitialized]);
 
 	// Reset initialization state when dialog closes
 	useEffect(() => {
@@ -158,6 +116,8 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 			setHasInitialized(false);
 		}
 	}, [open]);
+
+	const summaryState = getSummaryState(story.id);
 
 	return (
 		<Dialog.Root open={open} onOpenChange={(open) => !open && onClose()}>
@@ -197,13 +157,13 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 										<button
 											type="button"
 											onClick={handleSummarize}
-											disabled={summarizing || !!getSummary(story.id)}
+											disabled={summaryState.loading || !!summaryState.summary}
 											className="inline-flex items-center gap-2 px-3 py-1 text-sm bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
 										>
 											<FileText className="h-4 w-4" />
-											{summarizing
+											{summaryState.loading
 												? "Summarizing..."
-												: getSummary(story.id)
+												: summaryState.summary
 													? "Summary Ready"
 													: "Summarize"}
 										</button>
@@ -241,10 +201,12 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 											Summary
 										</h3>
 										<p className="text-sm text-orange-700 dark:text-orange-300">
-											{summarizing ? (
+											{summaryState.loading ? (
 												<LoadingText />
+											) : summaryState.error ? (
+												summaryState.error
 											) : (
-												getSummary(story.id)?.summary ||
+												summaryState.summary ||
 												"Click 'Summarize' to generate a summary"
 											)}
 										</p>
