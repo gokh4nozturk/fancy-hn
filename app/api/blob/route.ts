@@ -19,16 +19,40 @@ export async function GET(request: Request) {
 			);
 		}
 
+		// List all files in the summaries directory
 		const { blobs } = await list({
-			prefix: `${BLOB_PREFIX}${storyId}.json`,
+			prefix: BLOB_PREFIX,
+			limit: 100,
 		});
 
-		const blob = blobs[0];
-		if (!blob) {
+		// Find the most recent file for this storyId
+		let latestBlob = null;
+		let latestTimestamp = 0;
+
+		for (const blob of blobs) {
+			try {
+				const response = await fetch(blob.url);
+				if (!response.ok) continue;
+
+				const data = await response.json();
+				if (
+					data.storyId === Number(storyId) &&
+					data.timestamp > latestTimestamp
+				) {
+					latestBlob = blob;
+					latestTimestamp = data.timestamp;
+				}
+			} catch (error) {
+				// Skip invalid blobs silently
+				continue;
+			}
+		}
+
+		if (!latestBlob) {
 			return NextResponse.json({ data: null });
 		}
 
-		const response = await fetch(blob.url);
+		const response = await fetch(latestBlob.url);
 		if (!response.ok) {
 			throw new Error(`Failed to fetch summary: ${response.statusText}`);
 		}
@@ -36,13 +60,7 @@ export async function GET(request: Request) {
 		const data = await response.json();
 		return NextResponse.json({ data });
 	} catch (error) {
-		console.error("Error in GET /api/blob:", error);
-		if (error instanceof Error && error.message.includes("Invalid URL")) {
-			return NextResponse.json(
-				{ error: "Invalid request URL" },
-				{ status: 400 },
-			);
-		}
+		console.error("Blob storage error:", error);
 		return NextResponse.json(
 			{ error: "Failed to process request" },
 			{ status: 500 },
@@ -62,12 +80,13 @@ export async function POST(request: Request) {
 		}
 
 		const summaryData = {
+			storyId: Number(storyId),
 			summary,
 			timestamp: Date.now(),
 		};
 
 		const { url } = await put(
-			`${BLOB_PREFIX}${storyId}.json`,
+			`${BLOB_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2)}.json`,
 			JSON.stringify(summaryData),
 			{
 				contentType: "application/json",
@@ -75,9 +94,9 @@ export async function POST(request: Request) {
 			},
 		);
 
-		return NextResponse.json({ data: { ...summaryData, url } });
+		return NextResponse.json({ data: summaryData });
 	} catch (error) {
-		console.error("Error saving summary to blob:", error);
+		console.error("Failed to save to blob storage:", error);
 		return NextResponse.json(
 			{ error: "Failed to save summary" },
 			{ status: 500 },
@@ -100,13 +119,7 @@ export async function DELETE(request: Request) {
 		await del(`${BLOB_PREFIX}${storyId}.json`);
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("Error in DELETE /api/blob:", error);
-		if (error instanceof Error && error.message.includes("Invalid URL")) {
-			return NextResponse.json(
-				{ error: "Invalid request URL" },
-				{ status: 400 },
-			);
-		}
+		console.error("Failed to delete from blob storage:", error);
 		return NextResponse.json(
 			{ error: "Failed to process request" },
 			{ status: 500 },
