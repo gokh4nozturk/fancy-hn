@@ -35,6 +35,7 @@ function SanitizedHtml({
 	return (
 		<div
 			className={className}
+			// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
 			dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }}
 		/>
 	);
