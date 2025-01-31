@@ -1,6 +1,6 @@
 const API_BASE = "https://hacker-news.firebaseio.com/v0";
 
-export type StoryType = "top" | "best";
+export type StoryType = "top" | "best" | "new" | "ask" | "show" | "job";
 
 export async function fetchTopStories(limit = 1000): Promise<number[]> {
 	const response = await fetch(`${API_BASE}/topstories.json`);
@@ -10,6 +10,30 @@ export async function fetchTopStories(limit = 1000): Promise<number[]> {
 
 export async function fetchBestStories(limit = 1000): Promise<number[]> {
 	const response = await fetch(`${API_BASE}/beststories.json`);
+	const ids = await response.json();
+	return ids.slice(0, limit);
+}
+
+export async function fetchNewStories(limit = 1000): Promise<number[]> {
+	const response = await fetch(`${API_BASE}/newstories.json`);
+	const ids = await response.json();
+	return ids.slice(0, limit);
+}
+
+export async function fetchAskStories(limit = 200): Promise<number[]> {
+	const response = await fetch(`${API_BASE}/askstories.json`);
+	const ids = await response.json();
+	return ids.slice(0, limit);
+}
+
+export async function fetchShowStories(limit = 200): Promise<number[]> {
+	const response = await fetch(`${API_BASE}/showstories.json`);
+	const ids = await response.json();
+	return ids.slice(0, limit);
+}
+
+export async function fetchJobStories(limit = 200): Promise<number[]> {
+	const response = await fetch(`${API_BASE}/jobstories.json`);
 	const ids = await response.json();
 	return ids.slice(0, limit);
 }
@@ -30,8 +54,28 @@ export async function getStories(
 	searchQuery?: string,
 	storyType: StoryType = "top",
 ) {
-	const stories =
-		storyType === "top" ? await fetchTopStories() : await fetchBestStories();
+	let stories: number[];
+
+	switch (storyType) {
+		case "best":
+			stories = await fetchBestStories();
+			break;
+		case "new":
+			stories = await fetchNewStories();
+			break;
+		case "ask":
+			stories = await fetchAskStories();
+			break;
+		case "show":
+			stories = await fetchShowStories();
+			break;
+		case "job":
+			stories = await fetchJobStories();
+			break;
+		default:
+			stories = await fetchTopStories();
+	}
+
 	let filteredStories = stories;
 
 	if (searchQuery) {
@@ -55,7 +99,21 @@ export async function getStories(
 		paginatedStoryIds.map((id) => fetchItem(id)),
 	);
 
-	const validStories = paginatedStories.filter((story) => story?.url);
+	// Filter stories based on type-specific requirements
+	const validStories = paginatedStories.filter((story) => {
+		if (!story) return false;
+
+		switch (storyType) {
+			case "job":
+				return story.type === "job";
+			case "ask":
+				return story.type === "story" && story.title?.startsWith("Ask HN:");
+			case "show":
+				return story.type === "story" && story.title?.startsWith("Show HN:");
+			default:
+				return story.url; // For other types, keep the existing URL check
+		}
+	});
 
 	return {
 		stories: validStories,

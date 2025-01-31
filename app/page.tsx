@@ -6,6 +6,15 @@ import { type StoryType, getStories } from "./lib/api";
 type Params = Promise<{ slug: string }>;
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
+const storyTypeLabels: Record<StoryType, string> = {
+	top: "Top",
+	best: "Best",
+	new: "New",
+	ask: "Ask HN",
+	show: "Show HN",
+	job: "Jobs",
+};
+
 export async function generateMetadata(props: {
 	params: Params;
 	searchParams: SearchParams;
@@ -13,10 +22,11 @@ export async function generateMetadata(props: {
 	const searchParams = await props.searchParams;
 	const page = Number(searchParams.page) || 1;
 	const storyType = (searchParams.type as StoryType) || "top";
+	const label = storyTypeLabels[storyType];
 
 	return {
-		title: `${storyType === "top" ? "Top" : "Best"} Stories - Page ${page}`,
-		description: `Page ${page} of ${storyType === "top" ? "top" : "best"} Hacker News stories`,
+		title: `${label} Stories - Page ${page}`,
+		description: `Page ${page} of ${label.toLowerCase()} Hacker News stories`,
 	};
 }
 
