@@ -1,5 +1,5 @@
-import fs from "node:fs";
-import path from "node:path";
+const fs = require("fs");
+const path = require("path");
 
 // Function to get all files recursively
 const getAllFiles = (dirPath, arrayOfFiles = []) => {
