@@ -44,6 +44,7 @@ export async function GET(request: Request) {
 				}
 			} catch (error) {
 				// Skip invalid blobs silently
+				// biome-ignore lint/correctness/noUnnecessaryContinue: <explanation>
 				continue;
 			}
 		}
