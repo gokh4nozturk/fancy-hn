@@ -3,7 +3,8 @@
 import type { Story } from '../types';
 import { formatDistanceToNow } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import StoryDialog from './StoryDialog';
 
 interface Props {
   stories: Story[];
@@ -12,11 +13,7 @@ interface Props {
 }
 
 export default function StoryList({ stories }: Props) {
-  const router = useRouter();
-
-  const handlePageChange = (page: number) => {
-    router.push(`/?page=${page}`);
-  };
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
 
   return (
     <div className="space-y-4">
@@ -26,9 +23,12 @@ export default function StoryList({ stories }: Props) {
           className="p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
         >
           <div className="flex items-start gap-2">
-            <span className="text-sm text-muted-foreground min-w-[2rem] text-right mt-1">
-              {story.score}
-            </span>
+            <div>
+              <StoryDialog 
+                story={story} 
+                onStorySelect={setSelectedStory} 
+              />
+            </div>
             
             <div className="flex-1 space-y-1">
               <h2>
@@ -48,6 +48,8 @@ export default function StoryList({ stories }: Props) {
               </h2>
               
               <div className="text-sm text-muted-foreground">
+                <span>{story.score}</span>
+                <span className="mx-1">•</span>
                 <span>{story.by}</span>
                 <span className="mx-1">•</span>
                 <span>{formatDistanceToNow(story.time * 1000, { locale: enUS })} ago</span>
