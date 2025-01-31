@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import type { Story } from "../types";
+import * as Dialog from "@radix-ui/react-dialog";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
-import * as Dialog from "@radix-ui/react-dialog";
-import { Bot, X, Loader2, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Bot, Loader2, X } from "lucide-react";
+import { useState } from "react";
 import { summarizeStory } from "../lib/api";
+import type { Story } from "../types";
 
 interface Props {
 	story: Story | null;
@@ -58,8 +58,8 @@ export default function StoryDialog({ story, onStorySelect }: Props) {
 			</Dialog.Trigger>
 
 			<Dialog.Portal>
-				<Dialog.Overlay className="fixed inset-0 bg-black/50 data-[state=open]:animate-overlayShow" />
-				<Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 shadow-xl w-[90vw] max-w-md data-[state=open]:animate-contentShow">
+				<Dialog.Overlay className="fixed inset-0 bg-black/50 data-[state=open]:animate-overlayShow z-50" />
+				<Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 shadow-xl w-[90vw] max-w-md data-[state=open]:animate-contentShow z-[51]">
 					{story && (
 						<>
 							<Dialog.Title className="text-xl font-bold mb-4">
@@ -82,7 +82,9 @@ export default function StoryDialog({ story, onStorySelect }: Props) {
 								) : (
 									summary && (
 										<div className="p-4 bg-orange-50 rounded-md">
-											<p className="text-sm text-gray-700">{summary}</p>
+											<p className="text-sm text-gray-700 break-words overflow-hidden">
+												{summary}
+											</p>
 										</div>
 									)
 								)}
