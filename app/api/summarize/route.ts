@@ -172,8 +172,6 @@ export async function POST(request: Request) {
 			);
 		}
 
-		console.log("test");
-
 		// Use Together AI SDK for summarization
 		const completion = await together.chat.completions.create({
 			messages: [
