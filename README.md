@@ -1,4 +1,4 @@
-Fancy HN 🚀
+##Fancy HN 🚀
 
 A beautifully designed, modern Hacker News client with a sleek UI and seamless user experience. Built with performance and usability in mind, Fancy HN enhances your browsing experience with intuitive navigation, dark mode, and real-time updates.
 
