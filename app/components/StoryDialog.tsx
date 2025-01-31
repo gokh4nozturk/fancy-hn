@@ -51,7 +51,7 @@ export default function StoryDialog({ story, onStorySelect }: Props) {
               handleSummarize();
             }
           }}
-          className="p-2 rounded-full hover:bg-orange-100 transition-colors"
+          className="p-2 rounded-full hover:bg-orange-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Bot className="text-orange-500" />
         </button>
