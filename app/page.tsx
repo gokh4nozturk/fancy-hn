@@ -4,6 +4,8 @@ import { ThemeToggle } from './components/ThemeToggle'
 import Pagination from './components/Pagination'
 import { SearchBar } from './components/SearchBar'
 import { GithubIcon } from 'lucide-react'
+import { RefreshButton } from './components/RefreshButton'
+import { Button } from './components/ui/button'
 
 type Params = Promise<{ slug: string }>
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
@@ -41,6 +43,7 @@ export default async function Home(props: {
           </div>
           <div className="flex items-center gap-4">
             <SearchBar />
+            <RefreshButton />
             <ThemeToggle />
           </div>
         </div>
