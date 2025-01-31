@@ -41,6 +41,7 @@ export default function StoryDialog({ story, onStorySelect }: Props) {
     <Dialog.Root>
       <Dialog.Trigger asChild>
         <button
+          disabled
           type="button"
           onClick={() => {
             if (story) {
