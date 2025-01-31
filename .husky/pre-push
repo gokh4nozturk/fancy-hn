@@ -1,4 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-node scripts/clean-logs.js 
+if ! node scripts/clean-logs.js; then
+  echo "Failed to clean logs"
+  exit 1
+fi 
