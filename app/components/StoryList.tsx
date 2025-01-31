@@ -5,6 +5,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { useState } from 'react';
 import StoryDialog from './StoryDialog';
+import { motion } from 'framer-motion';
 
 interface Props {
   stories: Story[];
@@ -17,8 +18,12 @@ export default function StoryList({ stories }: Props) {
 
   return (
     <div className="space-y-4">
-      {stories.map((story) => (
-        <article 
+      {stories.map((story, index) => (
+        <motion.article 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3, delay: index * 0.1 }}
+          whileHover={{ scale: 1.02 }}
           key={story.id} 
           className="p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
         >
@@ -58,7 +63,7 @@ export default function StoryList({ stories }: Props) {
               </div>
             </div>
           </div>
-        </article>
+        </motion.article>
       ))}
     </div>
   );
