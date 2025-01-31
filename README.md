@@ -10,6 +10,24 @@ A beautifully designed, modern Hacker News client with a sleek UI and seamless u
 - 🔄 Real-time updates
 - 📱 Responsive design
 - 🎯 Built with modern tech stack
+- 📲 Progressive Web App (PWA)
+  - Works offline
+  - Install on any device
+  - Fast loading times
+  - Push notifications
+  - App-like experience
+
+## Progressive Web App 📱
+
+Fancy HN is built as a Progressive Web App, offering a native app-like experience:
+
+- **📥 Installable**: Add to your home screen on any device
+- **🔌 Offline Support**: Access content even without an internet connection
+- **⚡ Fast Loading**: Instant loading with service worker caching
+- **🔔 Push Notifications**: Stay updated with the latest stories
+- **🔄 Auto Updates**: Always get the latest version
+- **📱 Responsive**: Works seamlessly across all devices
+- **🔋 Battery Efficient**: Optimized for mobile devices
 
 ## Tech Stack 💻
 
@@ -20,6 +38,7 @@ A beautifully designed, modern Hacker News client with a sleek UI and seamless u
 - [Framer Motion](https://www.framer.com/motion/) - Animations
 - [Radix UI](https://www.radix-ui.com/) - UI components
 - [Vercel Analytics](https://vercel.com/analytics) - Analytics
+- [Next PWA](https://www.npmjs.com/package/next-pwa) - Progressive Web App support
 
 ## Getting Started 🚀
 
