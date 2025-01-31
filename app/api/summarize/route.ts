@@ -109,12 +109,11 @@ export async function POST(request: Request) {
 
 		// First check if we already have a summary
 		const existingSummary = await getSummaryFromBlob(storyId);
-		if (existingSummary) {
-			console.log("Using cached summary from Blob storage");
+
+		if (existingSummary?.summary) {
 			return NextResponse.json({ summary: existingSummary.summary });
 		}
 
-		console.log("Fetching URL:", url);
 		let html: string;
 		try {
 			html = await fetchWithFallback(url);

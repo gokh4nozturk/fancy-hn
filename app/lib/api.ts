@@ -14,6 +14,9 @@ export async function fetchMaxItem(): Promise<number> {
 
 	try {
 		const response = await fetch(`${API_BASE}/maxitem.json`);
+		if (!response.ok) {
+			throw new Error("Failed to fetch max item");
+		}
 		const maxItem = await response.json();
 
 		// Update cache
@@ -24,9 +27,8 @@ export async function fetchMaxItem(): Promise<number> {
 
 		return maxItem;
 	} catch (error) {
-		console.error("Error fetching max item:", error);
-		// Return cached value if available, even if expired
-		return maxItemCache?.value ?? 0;
+		console.error("API error: Failed to fetch max item", error);
+		throw error;
 	}
 }
 
@@ -155,26 +157,28 @@ export async function getStories(
 	};
 }
 
-export async function summarizeStory(url: string) {
+export async function summarizeStory(
+	storyId: number,
+	url: string,
+): Promise<string> {
 	try {
 		const response = await fetch("/api/summarize", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({ url }),
+			body: JSON.stringify({ storyId, url }),
 		});
 
 		if (!response.ok) {
-			throw new Error("Failed to summarize story");
+			const error = await response.json();
+			throw new Error(error.error || "Failed to summarize story");
 		}
 
-		return response.json();
+		const data = await response.json();
+		return data.summary;
 	} catch (error) {
-		console.error("Error summarizing story:", error);
-		return {
-			error:
-				"Özet oluşturulurken bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
-		};
+		console.error("API error: Failed to summarize story", error);
+		throw error;
 	}
 }

@@ -22,7 +22,7 @@ export async function saveSummaryToBlob(
 		const { data } = await response.json();
 		return data;
 	} catch (error) {
-		console.error("Error saving summary to blob:", error);
+		console.error("Storage error: Failed to save summary", error);
 		throw error;
 	}
 }
@@ -52,7 +52,7 @@ export async function getSummaryFromBlob(
 		const { data } = await response.json();
 		return data;
 	} catch (error) {
-		console.error("Error fetching summary from blob:", error);
+		console.error("Storage error: Failed to fetch summary", error);
 		return null;
 	}
 }
@@ -70,7 +70,7 @@ export async function deleteSummaryFromBlob(storyId: number): Promise<void> {
 			throw new Error("Failed to delete summary");
 		}
 	} catch (error) {
-		console.error("Error deleting summary from blob:", error);
+		console.error("Storage error: Failed to delete summary", error);
 		throw error;
 	}
 }
@@ -91,7 +91,7 @@ export async function listAllSummaries(): Promise<StorySummary[]> {
 		const { data } = await response.json();
 		return data;
 	} catch (error) {
-		console.error("Error listing summaries:", error);
+		console.error("Storage error: Failed to list summaries", error);
 		return [];
 	}
 }
