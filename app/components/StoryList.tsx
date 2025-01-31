@@ -1,10 +1,10 @@
 "use client";
 
-import * as HoverCard from "@radix-ui/react-hover-card";
+import * as Popover from "@radix-ui/react-popover";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { motion } from "framer-motion";
-import { ExternalLink, FileText, MessageSquare } from "lucide-react";
+import { ExternalLink, FileText, MessageSquare, X } from "lucide-react";
 import { useState } from "react";
 import { useReadStories } from "../hooks/useReadStories";
 import type { Story } from "../types";
@@ -23,15 +23,13 @@ export default function StoryList({ stories }: Props) {
 	const [loadingSummaries, setLoadingSummaries] = useState<
 		Record<number, boolean>
 	>({});
+	const [openPopoverId, setOpenPopoverId] = useState<number | null>(null);
 
 	const handleStoryClick = (story: Story) => {
 		markAsRead(story.id);
 	};
 
-	const handleSummarize = async (story: Story, event: React.MouseEvent) => {
-		event.preventDefault();
-		event.stopPropagation();
-
+	const handleSummarize = async (story: Story) => {
 		if (!story.url || loadingSummaries[story.id]) return;
 
 		setLoadingSummaries((prev) => ({ ...prev, [story.id]: true }));
@@ -130,13 +128,24 @@ export default function StoryList({ stories }: Props) {
 											<span>visit</span>
 										</a>
 										<span className="hidden sm:inline">•</span>
-										<HoverCard.Root openDelay={300} closeDelay={200}>
-											<HoverCard.Trigger asChild>
+										<Popover.Root
+											open={openPopoverId === story.id}
+											onOpenChange={(open) => {
+												if (open) {
+													setOpenPopoverId(story.id);
+													if (!summaries[story.id]) {
+														handleSummarize(story);
+													}
+												} else {
+													setOpenPopoverId(null);
+												}
+											}}
+										>
+											<Popover.Trigger asChild>
 												<button
 													type="button"
-													onClick={(e) => handleSummarize(story, e)}
-													disabled={loadingSummaries[story.id]}
 													className="inline-flex items-center gap-1 hover:text-orange-500 dark:hover:text-orange-300 disabled:opacity-50 disabled:cursor-not-allowed"
+													disabled={loadingSummaries[story.id]}
 												>
 													<FileText className="h-4 w-4" />
 													<span>
@@ -147,26 +156,28 @@ export default function StoryList({ stories }: Props) {
 																: "summarize"}
 													</span>
 												</button>
-											</HoverCard.Trigger>
-											{summaries[story.id] && (
-												<HoverCard.Portal>
-													<HoverCard.Content
-														className="w-[360px] rounded-lg bg-white dark:bg-gray-800 p-4 shadow-lg border border-border data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
-														side="top"
-														align="start"
-														sideOffset={8}
-													>
-														<div className="space-y-2">
-															<h3 className="text-sm font-medium">Summary</h3>
-															<p className="text-sm text-muted-foreground">
-																{summaries[story.id]}
-															</p>
-														</div>
-														<HoverCard.Arrow className="fill-white dark:fill-gray-800" />
-													</HoverCard.Content>
-												</HoverCard.Portal>
-											)}
-										</HoverCard.Root>
+											</Popover.Trigger>
+											<Popover.Portal>
+												<Popover.Content
+													className="w-[360px] rounded-lg bg-white dark:bg-gray-800 p-4 shadow-lg border border-border data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+													side="top"
+													align="start"
+													sideOffset={8}
+												>
+													<div className="space-y-2">
+														<h3 className="text-sm font-medium">Summary</h3>
+														<p className="text-sm text-muted-foreground">
+															{summaries[story.id] || "Loading summary..."}
+														</p>
+													</div>
+													<Popover.Arrow className="fill-white dark:fill-gray-800" />
+													<Popover.Close className="absolute top-2 right-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+														<X className="h-4 w-4" />
+														<span className="sr-only">Close</span>
+													</Popover.Close>
+												</Popover.Content>
+											</Popover.Portal>
+										</Popover.Root>
 									</>
 								)}
 							</div>
