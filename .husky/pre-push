@@ -1,17 +1,25 @@
 #!/bin/sh
 
-# Clean console logs from staged files
+# Clean console logs from all files
 clean_logs() {
-  for file in $(git diff --name-only --cached | grep '\.tsx\?$\|\.js$'); do
-    if [ -f "$file" ] && grep -l "console\.\(log\|info\|debug\)" "$file" > /dev/null; then
+  changed=false
+  
+  # Find all .ts, .tsx, and .js files in the app directory
+  for file in $(find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \)); do
+    if grep -l "console\.\(log\|info\|debug\)" "$file" > /dev/null; then
       sed -i '' '/console\.\(log\|info\|debug\)/d' "$file"
       sed -i '' '/^$/N;/^\n$/D' "$file"
       echo "Cleaned logs from $file"
       git add "$file"
-      return 0
+      changed=true
     fi
   done
-  return 1
+
+  if [ "$changed" = true ]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 # Run the clean logs function
