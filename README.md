@@ -45,37 +45,44 @@ Fancy HN is built as a Progressive Web App, offering a native app-like experienc
 ### Prerequisites
 
 - Node.js (LTS version recommended)
-- npm or yarn or pnpm
+- Package manager (npm, yarn, pnpm, or bun)
 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/yourusername/fancy-hn.git
 cd fancy-hn
 ```
 
-2. Install dependencies:
+1. Install dependencies:
+
 ```bash
 npm install
 # or
 yarn
 # or
 pnpm install
+# or
+bun install
 ```
 
-3. Create a `.env.local` file in the root directory and add required environment variables (if any).
+1. Create a `.env.local` file in the root directory and add required environment variables (if any).
 
-4. Start the development server:
+1. Start the development server:
+
 ```bash
 npm run dev
 # or
 yarn dev
 # or
 pnpm dev
+# or
+bun dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## Contributing 🤝
 
