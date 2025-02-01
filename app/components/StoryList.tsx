@@ -1,34 +1,15 @@
 "use client";
 
 import * as Popover from "@radix-ui/react-popover";
-import { formatDistanceToNow } from "date-fns";
-import { enUS } from "date-fns/locale";
 import { motion } from "framer-motion";
-import { ExternalLink, FileText, MessageSquare, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ExternalLink, X } from "lucide-react";
+import { useState } from "react";
 import { useReadStories } from "../hooks/useReadStories";
 import { useStorySummaries } from "../hooks/useStorySummaries";
-import { formatMarkdown } from "../lib/utils";
 import type { Story } from "../types";
 import StoryDetail from "./StoryDetail";
-
-const LoadingText = () => {
-	const [text, setText] = useState("Generating summary");
-
-	useEffect(() => {
-		const dots = [".", "..", "..."];
-		let i = 0;
-
-		const interval = setInterval(() => {
-			setText(`Generating summary${dots[i]}`);
-			i = (i + 1) % dots.length;
-		}, 500);
-
-		return () => clearInterval(interval);
-	}, []);
-
-	return <span className="inline-block min-w-[180px] font-mono">{text}</span>;
-};
+import { StoryMetadata } from "./StoryMetadata";
+import { StorySummary } from "./StorySummary";
 
 interface Props {
 	stories: Story[];
@@ -90,104 +71,57 @@ export default function StoryList({ stories }: Props) {
 									)}
 								</h2>
 
-								<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground/90 dark:text-muted-foreground/70">
-									<span>{story.score} points</span>
-									<span className="hidden sm:inline">•</span>
-									<span>by {story.by}</span>
-									<span className="hidden sm:inline">•</span>
-									<span>
-										{formatDistanceToNow(story.time * 1000, { locale: enUS })}{" "}
-										ago
-									</span>
-									<span className="hidden sm:inline">•</span>
-									<button
-										type="button"
-										onClick={() => setSelectedStory(story)}
-										className="inline-flex items-center gap-1 hover:text-orange-500 dark:hover:text-orange-300"
-									>
-										<MessageSquare className="h-4 w-4" />
-										<span>{story.descendants} comments</span>
-									</button>
+								<div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+									<StoryMetadata
+										story={story}
+										onCommentClick={() => setSelectedStory(story)}
+									/>
 									{story.url && (
-										<>
-											<span className="hidden sm:inline">•</span>
-											<Popover.Root
-												onOpenChange={(open) => {
-													if (
-														open &&
-														!summaryState.summary &&
-														!summaryState.loading
-													) {
-														handleSummarize(story);
-													}
-												}}
-											>
-												<Popover.Trigger asChild>
-													<button
-														type="button"
-														className="inline-flex items-center gap-1 hover:text-orange-500 dark:hover:text-orange-300 disabled:opacity-50 disabled:cursor-not-allowed"
-														disabled={summaryState.loading}
-													>
-														<FileText className="h-4 w-4" />
-														<span>
-															{summaryState.loading
-																? "summarizing..."
-																: summaryState.summary
-																	? "summary"
-																	: "summarize"}
-														</span>
-													</button>
-												</Popover.Trigger>
-												<Popover.Portal>
-													<Popover.Content
-														className="w-[400px] rounded-lg bg-card p-4 shadow-lg border border-border data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
-														side="top"
-														align="start"
-														sideOffset={8}
-													>
-														<div className="space-y-3">
-															<div className="flex items-center gap-2">
-																<h3 className="text-sm font-medium text-foreground">
-																	Summary
-																</h3>
-																{summaryState.summary && (
-																	<span className="inline-flex items-center rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-medium text-orange-400">
-																		Ready
-																	</span>
-																)}
-															</div>
-															<div className="text-sm leading-relaxed text-muted-foreground space-y-3 max-h-56 overflow-y-auto">
-																{summaryState.loading ? (
-																	<LoadingText />
-																) : summaryState.error ? (
-																	<p className="text-red-500 flex items-center gap-2">
-																		{summaryState.error}
-																	</p>
-																) : (
-																	summaryState.summary
-																		?.split("\n\n")
-																		.map((paragraph, index) => (
-																			<p
-																				key={`summary-${story.id}-${index}`}
-																				className="text-foreground/90 [&_strong]:font-bold [&_strong]:text-orange-500 dark:[&_strong]:text-orange-300"
-																				// biome-ignore lint/security/noDangerouslySetInnerHtml: Markdown is sanitized
-																				dangerouslySetInnerHTML={{
-																					__html: formatMarkdown(paragraph),
-																				}}
-																			/>
-																		))
-																)}
-															</div>
-														</div>
-														<Popover.Arrow className="fill-card" />
-														<Popover.Close className="absolute top-2 right-2 rounded-full p-1.5 opacity-70 hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-															<X className="h-4 w-4" />
-															<span className="sr-only">Close</span>
-														</Popover.Close>
-													</Popover.Content>
-												</Popover.Portal>
-											</Popover.Root>
-										</>
+										<Popover.Root
+											onOpenChange={(open) => {
+												if (
+													open &&
+													!summaryState.summary &&
+													!summaryState.loading
+												) {
+													handleSummarize(story);
+												}
+											}}
+										>
+											<Popover.Trigger asChild>
+												<button
+													type="button"
+													className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-orange-500 dark:hover:text-orange-300 disabled:opacity-50 disabled:cursor-not-allowed"
+													disabled={summaryState.loading}
+												>
+													{summaryState.loading
+														? "summarizing..."
+														: summaryState.summary
+															? "summary"
+															: "summarize"}
+												</button>
+											</Popover.Trigger>
+											<Popover.Portal>
+												<Popover.Content
+													className="w-[400px] rounded-lg bg-card p-4 shadow-lg border border-border data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+													side="top"
+													align="start"
+													sideOffset={8}
+												>
+													<StorySummary
+														storyId={story.id}
+														loading={summaryState.loading}
+														error={summaryState.error}
+														summary={summaryState.summary}
+													/>
+													<Popover.Arrow className="fill-card" />
+													<Popover.Close className="absolute top-2 right-2 rounded-full p-1.5 opacity-70 hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+														<X className="h-4 w-4" />
+														<span className="sr-only">Close</span>
+													</Popover.Close>
+												</Popover.Content>
+											</Popover.Portal>
+										</Popover.Root>
 									)}
 								</div>
 							</div>

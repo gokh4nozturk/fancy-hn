@@ -3,20 +3,14 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { motion } from "framer-motion";
-import {
-	ExternalLink,
-	FileText,
-	MessageSquare,
-	ThumbsUp,
-	User as UserIcon,
-	X,
-} from "lucide-react";
+import { ExternalLink, User as UserIcon, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useStorySummaries } from "../hooks/useStorySummaries";
 import { fetchItem, fetchUser } from "../lib/api";
-import { formatMarkdown } from "../lib/utils";
 import type { Comment, Story, User as UserType } from "../types";
+import { Comments } from "./Comments";
+import { StoryMetadata } from "./StoryMetadata";
+import { StorySummary } from "./StorySummary";
+import { SanitizedHtml } from "./ui/SanitizedHtml";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 interface Props {
@@ -25,55 +19,40 @@ interface Props {
 	open: boolean;
 }
 
-function SanitizedHtml({
-	html,
-	className,
-}: { html: string; className?: string }) {
-	const sanitizeHtml = (html: string) => {
-		return html
-			.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-			.replace(/on\w+="[^"]*"/g, "")
-			.replace(/javascript:/gi, "");
-	};
-
-	return (
-		<div
-			className={className}
-			// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
-			dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }}
-		/>
-	);
-}
-
-const LoadingText = () => {
-	const [text, setText] = useState("Generating summary");
-
-	useEffect(() => {
-		const dots = [".", "..", "..."];
-		let i = 0;
-
-		const interval = setInterval(() => {
-			setText(`Generating summary${dots[i]}`);
-			i = (i + 1) % dots.length;
-		}, 500);
-
-		return () => clearInterval(interval);
-	}, []);
-
-	return <span className="inline-block min-w-[180px] font-mono">{text}</span>;
-};
-
 export default function StoryDetail({ story, onClose, open }: Props) {
 	const [comments, setComments] = useState<Comment[]>([]);
 	const [author, setAuthor] = useState<UserType | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [hasInitialized, setHasInitialized] = useState(false);
-	const { getSummary, getSummaryState } = useStorySummaries();
+	const [summaryState, setSummaryState] = useState<{
+		loading: boolean;
+		error: string | null;
+		summary: string | null;
+	}>({
+		loading: false,
+		error: null,
+		summary: null,
+	});
 
 	const handleSummarize = useCallback(async () => {
 		if (!story.url) return;
-		await getSummary(story.id, story.url);
-	}, [story.url, story.id, getSummary]);
+		setSummaryState((prev) => ({ ...prev, loading: true, error: null }));
+		try {
+			const response = await fetch(
+				`/api/summarize?id=${story.id}&url=${encodeURIComponent(story.url)}`,
+			);
+			if (!response.ok) throw new Error("Failed to generate summary");
+			const data = await response.json();
+			setSummaryState((prev) => ({ ...prev, summary: data.summary }));
+		} catch (error) {
+			setSummaryState((prev) => ({
+				...prev,
+				error: "Failed to generate summary. Please try again later.",
+			}));
+		} finally {
+			setSummaryState((prev) => ({ ...prev, loading: false }));
+		}
+	}, [story.url, story.id]);
 
 	// Initialize data when dialog opens
 	useEffect(() => {
@@ -118,8 +97,6 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 			setHasInitialized(false);
 		}
 	}, [open]);
-
-	const summaryState = getSummaryState(story.id);
 
 	return (
 		<Dialog.Root open={open} onOpenChange={(open) => !open && onClose()}>
@@ -176,37 +153,10 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 											<ExternalLink className="h-4 w-4" />
 											{new URL(story.url).hostname}
 										</a>
-										{!summaryState.summary && !summaryState.loading && (
-											<button
-												type="button"
-												onClick={handleSummarize}
-												className="inline-flex items-center gap-2 px-3 py-1 text-sm bg-orange-500 text-white rounded-md hover:bg-orange-600"
-											>
-												<FileText className="h-4 w-4" />
-												Summarize
-											</button>
-										)}
 									</div>
 								)}
 
-								<div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground pt-2">
-									<div className="flex items-center gap-1">
-										<ThumbsUp className="h-4 w-4" />
-										<span>{story.score} points</span>
-									</div>
-									<div className="flex items-center gap-1">
-										<UserIcon className="h-4 w-4" />
-										<span>by {story.by}</span>
-									</div>
-									<div className="flex items-center gap-1">
-										<MessageSquare className="h-4 w-4" />
-										<span>{story.descendants} comments</span>
-									</div>
-									<span>
-										{formatDistanceToNow(story.time * 1000, { locale: enUS })}{" "}
-										ago
-									</span>
-								</div>
+								<StoryMetadata story={story} className="pt-2" />
 							</div>
 						</div>
 
@@ -214,43 +164,16 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 						<div className="flex-1 overflow-y-auto bg-background">
 							<div className="p-4 sm:p-6 space-y-6">
 								{/* Summary */}
-								{story.url &&
-									(summaryState.loading || summaryState.summary) && (
-										<div className="bg-muted/10 rounded-lg p-4 sm:p-6 break-words border">
-											<div className="flex items-center gap-2 mb-3">
-												<h3 className="text-sm font-medium text-foreground m-0">
-													Summary
-												</h3>
-												{!summaryState.loading && (
-													<span className="inline-flex items-center rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-medium text-orange-400">
-														Ready
-													</span>
-												)}
-											</div>
-											<div className="text-sm leading-relaxed text-muted-foreground space-y-3">
-												{summaryState.loading ? (
-													<LoadingText />
-												) : summaryState.error ? (
-													<p className="text-red-500 flex items-center gap-2">
-														{summaryState.error}
-													</p>
-												) : (
-													summaryState.summary
-														?.split("\n\n")
-														.map((paragraph, index) => (
-															<p
-																key={`summary-${story.id}-${index}`}
-																className="text-foreground/90 [&_strong]:font-bold [&_strong]:text-orange-500 dark:[&_strong]:text-orange-300"
-																// biome-ignore lint/security/noDangerouslySetInnerHtml: Markdown is sanitized
-																dangerouslySetInnerHTML={{
-																	__html: formatMarkdown(paragraph),
-																}}
-															/>
-														))
-												)}
-											</div>
-										</div>
-									)}
+								{story.url && (
+									<StorySummary
+										storyId={story.id}
+										loading={summaryState.loading}
+										error={summaryState.error}
+										summary={summaryState.summary}
+										onSummarize={handleSummarize}
+										showSummarizeButton
+									/>
+								)}
 
 								{/* Story Content */}
 								{story.text && (
@@ -287,48 +210,7 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 								)}
 
 								{/* Comments */}
-								<div className="space-y-4">
-									<h3 className="font-medium flex items-center gap-2 text-foreground">
-										<MessageSquare className="h-4 w-4" />
-										Comments ({comments.length})
-									</h3>
-									{loading ? (
-										<div className="text-center py-8 text-muted-foreground">
-											Loading comments...
-										</div>
-									) : comments.length > 0 ? (
-										<div className="space-y-3">
-											{comments.map((comment) => (
-												<motion.div
-													key={comment.id}
-													initial={{ opacity: 0, y: 20 }}
-													animate={{ opacity: 1, y: 0 }}
-													className="rounded-lg bg-muted/50 p-4 border border-border"
-												>
-													<div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-														<UserIcon className="h-3 w-3" />
-														<span className="font-medium">{comment.by}</span>
-														<span>•</span>
-														<span>
-															{formatDistanceToNow(comment.time * 1000, {
-																locale: enUS,
-															})}{" "}
-															ago
-														</span>
-													</div>
-													<SanitizedHtml
-														html={comment.text}
-														className="prose prose-sm dark:prose-invert max-w-none text-foreground break-words overflow-hidden overflow-x-auto"
-													/>
-												</motion.div>
-											))}
-										</div>
-									) : (
-										<div className="text-center py-8 text-muted-foreground">
-											No comments yet
-										</div>
-									)}
-								</div>
+								<Comments comments={comments} loading={loading} />
 							</div>
 						</div>
 					</div>
