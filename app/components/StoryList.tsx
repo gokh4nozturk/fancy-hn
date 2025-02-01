@@ -10,6 +10,7 @@ import type { Story } from "../types";
 import StoryDetail from "./StoryDetail";
 import { StoryMetadata } from "./StoryMetadata";
 import { StorySummary } from "./StorySummary";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 interface Props {
 	stories: Story[];
@@ -115,7 +116,7 @@ export default function StoryList({ stories }: Props) {
 														summary={summaryState.summary}
 													/>
 													<Popover.Arrow className="fill-card" />
-													<Popover.Close className="absolute top-2 right-2 rounded-full p-1.5 opacity-70 hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+													<Popover.Close className="absolute top-4 right-3 rounded-full p-2 opacity-70 hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
 														<X className="h-4 w-4" />
 														<span className="sr-only">Close</span>
 													</Popover.Close>
