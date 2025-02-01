@@ -139,32 +139,45 @@ export default function StoryList({ stories }: Props) {
 												</Popover.Trigger>
 												<Popover.Portal>
 													<Popover.Content
-														className="w-[360px] rounded-lg bg-white dark:bg-gray-800 p-4 shadow-lg border border-border data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+														className="w-[400px] rounded-lg bg-card p-4 shadow-lg border border-border data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
 														side="top"
 														align="start"
 														sideOffset={8}
 													>
-														<div className="space-y-2">
+														<div className="space-y-3">
 															<div className="flex items-center gap-2">
-																<h3 className="text-sm font-medium">Summary</h3>
+																<h3 className="text-sm font-medium text-foreground">
+																	Summary
+																</h3>
 																{summaryState.summary && (
-																	<span className="inline-flex items-center rounded-md bg-orange-50 dark:bg-orange-500/20 px-2 py-0.5 text-xs font-medium text-orange-600 dark:text-orange-300 ring-1 ring-inset ring-orange-500/20">
+																	<span className="inline-flex items-center rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-medium text-orange-400">
 																		Ready
 																	</span>
 																)}
 															</div>
-															<p className="text-sm text-muted-foreground">
+															<div className="text-sm leading-relaxed text-muted-foreground space-y-3 max-h-56 overflow-y-auto">
 																{summaryState.loading ? (
 																	<LoadingText />
 																) : summaryState.error ? (
-																	summaryState.error
+																	<p className="text-red-500 flex items-center gap-2">
+																		{summaryState.error}
+																	</p>
 																) : (
-																	summaryState.summary || "No summary available"
+																	summaryState.summary
+																		?.split("\n\n")
+																		.map((paragraph, index) => (
+																			<p
+																				key={`summary-${story.id}-${index}`}
+																				className="text-foreground/90"
+																			>
+																				{paragraph}
+																			</p>
+																		))
 																)}
-															</p>
+															</div>
 														</div>
-														<Popover.Arrow className="fill-white dark:fill-gray-800" />
-														<Popover.Close className="absolute top-2 right-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+														<Popover.Arrow className="fill-card" />
+														<Popover.Close className="absolute top-2 right-2 rounded-full p-1.5 opacity-70 hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
 															<X className="h-4 w-4" />
 															<span className="sr-only">Close</span>
 														</Popover.Close>

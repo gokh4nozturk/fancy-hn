@@ -215,19 +215,37 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 								{/* Summary */}
 								{story.url &&
 									(summaryState.loading || summaryState.summary) && (
-										<div className="prose prose-orange dark:prose-invert max-w-none bg-orange-50 dark:bg-orange-950/20 rounded-lg p-4 break-words overflow-hidden border border-orange-200 dark:border-orange-900">
-											<h3 className="text-sm font-medium text-orange-800 dark:text-orange-200 mb-2">
-												Summary
-											</h3>
-											<p className="text-sm text-orange-700 dark:text-orange-300">
+										<div className="bg-muted/10 rounded-lg p-4 sm:p-6 break-words border">
+											<div className="flex items-center gap-2 mb-3">
+												<h3 className="text-sm font-medium text-foreground m-0">
+													Summary
+												</h3>
+												{!summaryState.loading && (
+													<span className="inline-flex items-center rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-medium text-orange-400">
+														Ready
+													</span>
+												)}
+											</div>
+											<div className="text-sm leading-relaxed text-muted-foreground space-y-3">
 												{summaryState.loading ? (
 													<LoadingText />
 												) : summaryState.error ? (
-													summaryState.error
+													<p className="text-red-500 flex items-center gap-2">
+														{summaryState.error}
+													</p>
 												) : (
 													summaryState.summary
+														?.split("\n\n")
+														.map((paragraph, index) => (
+															<p
+																key={`summary-${story.id}-${index}`}
+																className="text-foreground/90"
+															>
+																{paragraph}
+															</p>
+														))
 												)}
-											</p>
+											</div>
 										</div>
 									)}
 
