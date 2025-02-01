@@ -8,6 +8,7 @@ import { ExternalLink, FileText, MessageSquare, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useReadStories } from "../hooks/useReadStories";
 import { useStorySummaries } from "../hooks/useStorySummaries";
+import { formatMarkdown } from "../lib/utils";
 import type { Story } from "../types";
 import StoryDetail from "./StoryDetail";
 
@@ -168,10 +169,12 @@ export default function StoryList({ stories }: Props) {
 																		.map((paragraph, index) => (
 																			<p
 																				key={`summary-${story.id}-${index}`}
-																				className="text-foreground/90"
-																			>
-																				{paragraph}
-																			</p>
+																				className="text-foreground/90 [&>strong]:text-orange-500 dark:[&>strong]:text-orange-300 [&>em]:text-orange-400 dark:[&>em]:text-orange-200 [&>em]:italic"
+																				// biome-ignore lint/security/noDangerouslySetInnerHtml: Markdown is sanitized
+																				dangerouslySetInnerHTML={{
+																					__html: formatMarkdown(paragraph),
+																				}}
+																			/>
 																		))
 																)}
 															</div>
