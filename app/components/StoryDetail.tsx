@@ -12,7 +12,6 @@ import { Comments } from "./Comments";
 import { StoryMetadata } from "./StoryMetadata";
 import { StorySummary } from "./StorySummary";
 import { SanitizedHtml } from "./ui/SanitizedHtml";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 interface Props {
 	story: Story;
@@ -96,22 +95,6 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 											<Dialog.Title className="text-lg sm:text-xl font-bold leading-tight text-foreground">
 												{story.title}
 											</Dialog.Title>
-											{summaryState.summary && (
-												<div className="flex items-center gap-2">
-													<Tooltip>
-														<TooltipTrigger asChild>
-															<span className="inline-flex items-center rounded-md bg-orange-50 dark:bg-orange-500/20 px-2 py-0.5 text-xs font-medium text-orange-600 dark:text-orange-300 ring-1 ring-inset ring-orange-500/20 shrink-0 cursor-help transition-colors hover:bg-orange-100 dark:hover:bg-orange-500/30">
-																Summary Ready
-															</span>
-														</TooltipTrigger>
-														<TooltipContent side="bottom" align="start">
-															An AI-powered summary has been generated for this
-															story, providing a quick overview of its main
-															points and key content.
-														</TooltipContent>
-													</Tooltip>
-												</div>
-											)}
 										</div>
 									</div>
 									<Dialog.Close
