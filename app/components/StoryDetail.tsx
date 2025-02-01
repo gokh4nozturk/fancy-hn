@@ -15,6 +15,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { useStorySummaries } from "../hooks/useStorySummaries";
 import { fetchItem, fetchUser } from "../lib/api";
+import { formatMarkdown } from "../lib/utils";
 import type { Comment, Story, User as UserType } from "../types";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
@@ -239,10 +240,12 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 														.map((paragraph, index) => (
 															<p
 																key={`summary-${story.id}-${index}`}
-																className="text-foreground/90"
-															>
-																{paragraph}
-															</p>
+																className="text-foreground/90 [&>strong]:text-orange-500 dark:[&>strong]:text-orange-300 [&>em]:text-orange-400 dark:[&>em]:text-orange-200 [&>em]:italic"
+																// biome-ignore lint/security/noDangerouslySetInnerHtml: Markdown is sanitized
+																dangerouslySetInnerHTML={{
+																	__html: formatMarkdown(paragraph),
+																}}
+															/>
 														))
 												)}
 											</div>
