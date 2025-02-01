@@ -22,9 +22,7 @@ export function StorySummary({
 	showSummarizeButton = false,
 }: StorySummaryProps) {
 	return (
-		<div
-			className={`bg-muted/10 rounded-lg p-4 sm:p-6 break-words border ${className}`}
-		>
+		<div className={`bg-muted/10 break-words ${className}`}>
 			<div className="flex items-center justify-between gap-2 mb-3">
 				<div className="flex items-center gap-2">
 					<h3 className="text-sm font-medium text-foreground m-0">Summary</h3>

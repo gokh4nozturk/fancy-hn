@@ -172,6 +172,7 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 										summary={summaryState.summary}
 										onSummarize={handleSummarize}
 										showSummarizeButton
+										className="border rounded-lg p-4 sm:p-6"
 									/>
 								)}
 
