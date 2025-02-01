@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { ExternalLink, User as UserIcon, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useStorySummaries } from "../hooks/useStorySummaries";
 import { fetchItem, fetchUser } from "../lib/api";
 import type { Comment, Story, User as UserType } from "../types";
 import { Comments } from "./Comments";
@@ -24,35 +25,12 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 	const [author, setAuthor] = useState<UserType | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [hasInitialized, setHasInitialized] = useState(false);
-	const [summaryState, setSummaryState] = useState<{
-		loading: boolean;
-		error: string | null;
-		summary: string | null;
-	}>({
-		loading: false,
-		error: null,
-		summary: null,
-	});
+	const { getSummary, getSummaryState } = useStorySummaries();
 
 	const handleSummarize = useCallback(async () => {
 		if (!story.url) return;
-		setSummaryState((prev) => ({ ...prev, loading: true, error: null }));
-		try {
-			const response = await fetch(
-				`/api/summarize?id=${story.id}&url=${encodeURIComponent(story.url)}`,
-			);
-			if (!response.ok) throw new Error("Failed to generate summary");
-			const data = await response.json();
-			setSummaryState((prev) => ({ ...prev, summary: data.summary }));
-		} catch (error) {
-			setSummaryState((prev) => ({
-				...prev,
-				error: "Failed to generate summary. Please try again later.",
-			}));
-		} finally {
-			setSummaryState((prev) => ({ ...prev, loading: false }));
-		}
-	}, [story.url, story.id]);
+		await getSummary(story.id, story.url);
+	}, [story.url, story.id, getSummary]);
 
 	// Initialize data when dialog opens
 	useEffect(() => {
@@ -97,6 +75,8 @@ export default function StoryDetail({ story, onClose, open }: Props) {
 			setHasInitialized(false);
 		}
 	}, [open]);
+
+	const summaryState = getSummaryState(story.id);
 
 	return (
 		<Dialog.Root open={open} onOpenChange={(open) => !open && onClose()}>
