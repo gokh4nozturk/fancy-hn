@@ -49,7 +49,7 @@ export default async function Home(props: {
 	);
 
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="min-h-screen bg-background grid grid-rows-[auto_1fr_auto]">
 			<Header />
 			<MainContent
 				stories={stories}
